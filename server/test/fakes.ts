@@ -93,6 +93,16 @@ export class FakeRepo implements Repo {
     return n;
   }
 
+  async cancelGrants(groupId: string) {
+    let n = 0;
+    for (const g of this.grants) {
+      if (g.groupId === groupId && (g.status === 'pending' || g.status === 'active')) {
+        g.status = 'cancelled'; g.updatedAt = iso(this.nowFn()); n++;
+      }
+    }
+    return n;
+  }
+
   async upsertGoal(date: string, text: string, target: string | null): Promise<Goal> {
     const existing = this.goals.find((g) => g.date === date);
     if (existing) { existing.text = text; existing.target = target; return existing; }

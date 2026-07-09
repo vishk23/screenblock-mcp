@@ -119,6 +119,17 @@ describe('MCP tools', () => {
     expect(r.json.grant.expiresAt).toBe('2026-07-08T13:00:00.000Z');
   });
 
+  it('block_now cancels an active grant — later intent wins', async () => {
+    const { repo, call } = await setup();
+    await call('create_group', { name: 'Social' });
+    await call('grant_temp_access', { group: 'Social', minutes: 15, reason: 'bus' });
+    expect(await repo.listGrants(['pending', 'active'])).toHaveLength(1);
+    const r = await call('block_now', { group: 'Social' });
+    expect(r.json.cancelled_grants).toBe(1);
+    expect(await repo.listGrants(['pending', 'active'])).toHaveLength(0);
+    expect((await repo.listGrants()).at(-1)?.status).toBe('cancelled');
+  });
+
   it('block_now + unblock lifecycle', async () => {
     const { repo, call } = await setup();
     await call('create_group', { name: 'Social' });

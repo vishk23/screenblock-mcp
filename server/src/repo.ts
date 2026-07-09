@@ -22,6 +22,8 @@ export interface Repo {
   createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date): Promise<Grant>;
   /** Marks pending/active grants with expires_at <= now as expired. Returns count. */
   expireGrants(now: Date): Promise<number>;
+  /** Cancels pending/active grants for a group (a later block overrides an earlier grant). */
+  cancelGrants(groupId: string): Promise<number>;
 
   upsertGoal(date: string, text: string, target: string | null): Promise<Goal>;
   getGoal(date: string): Promise<Goal | null>;
@@ -163,6 +165,15 @@ export class PgRepo implements Repo {
       `update grants set status = 'expired', updated_at = now()
        where status in ('pending','active') and expires_at <= $1`,
       [now],
+    );
+    return rowCount ?? 0;
+  }
+
+  async cancelGrants(groupId: string) {
+    const { rowCount } = await this.pool.query(
+      `update grants set status = 'cancelled', updated_at = now()
+       where group_id = $1 and status in ('pending','active')`,
+      [groupId],
     );
     return rowCount ?? 0;
   }

@@ -169,14 +169,20 @@ export function buildMcpServer(deps: Deps): McpServer {
   server.registerTool('block_now', {
     title: 'Block a group immediately',
     description:
-      'Shields a group right now — indefinitely, or until the given ISO-8601 time. Use unblock to lift it.',
+      'Shields a group right now — indefinitely, or until the given ISO-8601 time. Cancels any active temporary grant on the group (a block issued after a grant wins). Use unblock to lift it.',
     inputSchema: { group: z.string(), until: z.string().datetime().optional() },
   }, async ({ group: name, until }) => {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
+    // Later intent wins: an explicit block ends any grant currently in effect.
+    const cancelledGrants = await repo.cancelGrants(found.group.id);
     const policy = await repo.replacePolicy(found.group.id, 'block', { until: until ?? null });
     const delivery = await afterMutation(`Block ${found.group.name} now`, policy.updatedAt);
-    return ok({ policy: policyView(policy), group: found.group.name, delivery, ...setupNote(found.group) });
+    return ok({
+      policy: policyView(policy), group: found.group.name, delivery,
+      ...(cancelledGrants > 0 ? { cancelled_grants: cancelledGrants } : {}),
+      ...setupNote(found.group),
+    });
   });
 
   server.registerTool('unblock', {
