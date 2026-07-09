@@ -67,3 +67,9 @@ create table if not exists devices (
   applied_through timestamptz,
   last_seen_at timestamptz not null default now()
 );
+
+-- Round 2: unlock modes + grant provenance
+alter table groups add column if not exists mode text not null default 'quota';
+alter table groups add column if not exists quota_per_day int not null default 2;
+alter table groups add column if not exists quota_minutes int not null default 10;
+alter table grants add column if not exists source text not null default 'chat';

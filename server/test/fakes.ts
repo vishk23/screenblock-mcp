@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Repo } from '../src/repo.js';
 import type {
-  Group, Policy, PolicyKind, Grant, Goal, EventRow, Device, NewEvent, SyncPayload,
+  Group, GroupMode, Policy, PolicyKind, Grant, GrantSource, Goal, EventRow, Device, NewEvent, SyncPayload,
 } from '../src/types.js';
 import type { Push } from '../src/push.js';
 
@@ -28,7 +28,11 @@ export class FakeRepo implements Repo {
 
   async createGroup(name: string): Promise<Group> {
     if (this.groups.some((g) => g.name === name)) throw new Error(`duplicate group: ${name}`);
-    const g: Group = { id: randomUUID(), name, hasSelection: false, updatedAt: iso(this.nowFn()) };
+    const g: Group = {
+      id: randomUUID(), name, hasSelection: false,
+      mode: 'quota', quotaPerDay: 2, quotaMinutes: 10,
+      updatedAt: iso(this.nowFn()),
+    };
     this.groups.push(g);
     return g;
   }
@@ -73,14 +77,24 @@ export class FakeRepo implements Repo {
     return this.grants.filter((g) => !statuses || statuses.includes(g.status));
   }
 
-  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date): Promise<Grant> {
+  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source: GrantSource = 'chat'): Promise<Grant> {
     const grant: Grant = {
       id: randomUUID(), groupId, minutes, reason,
       startsAt: iso(this.nowFn()), expiresAt: iso(expiresAt),
-      status: 'pending', updatedAt: iso(this.nowFn()),
+      status: 'pending', source, updatedAt: iso(this.nowFn()),
     };
     this.grants.push(grant);
     return grant;
+  }
+
+  async setGroupMode(id: string, mode: GroupMode, quotaPerDay?: number, quotaMinutes?: number): Promise<Group> {
+    const g = this.groups.find((x) => x.id === id);
+    if (!g) throw new Error('no such group');
+    g.mode = mode;
+    if (quotaPerDay !== undefined) g.quotaPerDay = quotaPerDay;
+    if (quotaMinutes !== undefined) g.quotaMinutes = quotaMinutes;
+    g.updatedAt = iso(this.nowFn());
+    return g;
   }
 
   async expireGrants(now: Date) {

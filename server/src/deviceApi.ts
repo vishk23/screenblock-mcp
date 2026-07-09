@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { z } from 'zod';
 import type { Repo } from './repo.js';
 import type { Config } from './config.js';
+import { todayInTz } from './domain.js';
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 const wrap = (fn: AsyncHandler) => (req: Request, res: Response, next: NextFunction) => {
@@ -20,6 +21,60 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config }): Router {
     }
     next();
   });
+
+  /**
+   * Self-serve unlock from the device ("the moment at the wall").
+   * strict → always denied (chat-only). quota → counted against the group's
+   * daily ration, duration fixed to quota_minutes, reason REQUIRED.
+   * open → any duration up to the server grant cap.
+   * The device applies the grant locally at once; this records + validates it.
+   */
+  router.post('/grants', wrap(async (req, res) => {
+    const body = z.object({
+      groupId: z.string().uuid(),
+      reason: z.string().trim().min(1).max(200),
+      minutes: z.number().int().min(1).optional(),
+    }).safeParse(req.body);
+    if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
+
+    const group = (await repo.listGroups()).find((g) => g.id === body.data.groupId);
+    if (!group) { res.status(404).json({ error: 'no such group' }); return; }
+    if (group.mode === 'strict') {
+      res.status(403).json({ error: 'strict_mode', message: 'This group is chat-only. Ask your coach in ChatGPT.' });
+      return;
+    }
+
+    await repo.expireGrants(new Date());
+    let minutes: number;
+    let remainingToday: number | null = null;
+    if (group.mode === 'quota') {
+      const today = todayInTz(config.timezone);
+      const usedToday = (await repo.listGrants()).filter((g) =>
+        g.groupId === group.id
+        && g.source === 'device_quota'
+        && g.status !== 'cancelled'
+        && todayInTz(config.timezone, new Date(g.startsAt)) === today,
+      ).length;
+      if (usedToday >= group.quotaPerDay) {
+        res.status(403).json({
+          error: 'quota_exhausted',
+          message: `All ${group.quotaPerDay} unlocks used today. Ask your coach in ChatGPT.`,
+          used_today: usedToday, quota_per_day: group.quotaPerDay,
+        });
+        return;
+      }
+      minutes = group.quotaMinutes;
+      remainingToday = group.quotaPerDay - usedToday - 1;
+    } else {
+      minutes = Math.min(body.data.minutes ?? group.quotaMinutes, config.maxGrantMinutes);
+    }
+
+    const grant = await repo.createGrant(
+      group.id, minutes, body.data.reason,
+      new Date(Date.now() + minutes * 60_000), 'device_quota',
+    );
+    res.json({ grant, remaining_today: remainingToday });
+  }));
 
   router.post('/register', wrap(async (req, res) => {
     const body = z.object({ apnsToken: z.string().min(1) }).safeParse(req.body);

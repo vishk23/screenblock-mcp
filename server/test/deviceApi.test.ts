@@ -19,6 +19,65 @@ function makeApp(repo = new FakeRepo()) {
 
 const auth = { Authorization: 'Bearer device-secret' };
 
+describe('device unlock endpoint (POST /device/grants)', () => {
+  it('strict mode always 403; missing reason 400', async () => {
+    const { app, repo } = makeApp();
+    const g = await repo.createGroup('Instagram');
+    await repo.setGroupMode(g.id, 'strict');
+    const r = await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: 'DM' }).expect(403);
+    expect(r.body.error).toBe('strict_mode');
+    await repo.setGroupMode(g.id, 'quota');
+    await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: '' }).expect(400);
+    await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id }).expect(400);
+  });
+
+  it('quota mode: fixed minutes, counts down, then 403 quota_exhausted', async () => {
+    const { app, repo } = makeApp();
+    const g = await repo.createGroup('Social');
+    await repo.setGroupMode(g.id, 'quota', 2, 10);
+    const r1 = await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: 'got a DM', minutes: 55 }).expect(200);
+    expect(r1.body.grant.minutes).toBe(10); // quota mode ignores requested minutes
+    expect(r1.body.grant.source).toBe('device_quota');
+    expect(r1.body.remaining_today).toBe(1);
+    const r2 = await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: 'again' }).expect(200);
+    expect(r2.body.remaining_today).toBe(0);
+    const r3 = await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: 'third' }).expect(403);
+    expect(r3.body.error).toBe('quota_exhausted');
+  });
+
+  it('chat grants do not consume the device quota', async () => {
+    const { app, repo } = makeApp();
+    const g = await repo.createGroup('Social');
+    await repo.setGroupMode(g.id, 'quota', 1, 10);
+    await repo.createGrant(g.id, 15, 'from chat', new Date(Date.now() + 900_000), 'chat');
+    const r = await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: 'DM' }).expect(200);
+    expect(r.body.remaining_today).toBe(0);
+  });
+
+  it('open mode: honors requested minutes up to the server cap', async () => {
+    const { app, repo } = makeApp();
+    const g = await repo.createGroup('News');
+    await repo.setGroupMode(g.id, 'open');
+    const r = await request(app).post('/device/grants').set(auth)
+      .send({ groupId: g.id, reason: 'reading', minutes: 240 }).expect(200);
+    expect(r.body.grant.minutes).toBe(60); // maxGrantMinutes cap
+    expect(r.body.remaining_today).toBeNull();
+  });
+
+  it('unknown group 404', async () => {
+    const { app } = makeApp();
+    await request(app).post('/device/grants').set(auth)
+      .send({ groupId: '00000000-0000-0000-0000-000000000000', reason: 'x' }).expect(404);
+  });
+});
+
 describe('device API', () => {
   it('rejects missing/wrong bearer', async () => {
     const { app } = makeApp();

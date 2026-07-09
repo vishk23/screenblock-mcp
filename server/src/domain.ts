@@ -39,7 +39,7 @@ export interface Summary {
   shieldShown: Record<string, number>;
   shieldTaps: number;
   thresholdsCrossed: Array<{ group: string; thresholdMinutes: number; at: string }>;
-  grantsUsed: Array<{ group: string; minutes: number; reason: string | null }>;
+  grantsUsed: Array<{ group: string; minutes: number; reason: string | null; source: string }>;
 }
 
 export function buildSummary(input: {
@@ -76,7 +76,7 @@ export function buildSummary(input: {
     shieldTaps,
     thresholdsCrossed,
     grantsUsed: input.grants.map((g) => ({
-      group: nameOf(g.groupId), minutes: g.minutes, reason: g.reason,
+      group: nameOf(g.groupId), minutes: g.minutes, reason: g.reason, source: g.source,
     })),
   };
 }

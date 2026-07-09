@@ -1,5 +1,5 @@
 import type {
-  Group, Policy, PolicyKind, Grant, Goal, EventRow, Device, NewEvent, SyncPayload,
+  Group, GroupMode, Policy, PolicyKind, Grant, GrantSource, Goal, EventRow, Device, NewEvent, SyncPayload,
 } from './types.js';
 import pg from 'pg';
 
@@ -7,6 +7,7 @@ export interface Repo {
   listGroups(): Promise<Group[]>;
   createGroup(name: string): Promise<Group>;
   setGroupSelection(id: string, hasSelection: boolean): Promise<void>;
+  setGroupMode(id: string, mode: GroupMode, quotaPerDay?: number, quotaMinutes?: number): Promise<Group>;
 
   listPolicies(activeOnly?: boolean): Promise<Policy[]>;
   /** Deactivates any active policy of this kind on the group, inserts the new one. */
@@ -19,7 +20,7 @@ export interface Repo {
   deactivatePolicies(groupId: string, kind?: PolicyKind): Promise<number>;
 
   listGrants(statuses?: Grant['status'][]): Promise<Grant[]>;
-  createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date): Promise<Grant>;
+  createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source?: GrantSource): Promise<Grant>;
   /** Marks pending/active grants with expires_at <= now as expired. Returns count. */
   expireGrants(now: Date): Promise<number>;
   /** Cancels pending/active grants for a group (a later block overrides an earlier grant). */
@@ -47,7 +48,9 @@ export function makePool(databaseUrl: string): pg.Pool {
 const isoOrNull = (v: Date | null): string | null => (v ? v.toISOString() : null);
 
 const rowToGroup = (r: any): Group => ({
-  id: r.id, name: r.name, hasSelection: r.has_selection, updatedAt: r.updated_at.toISOString(),
+  id: r.id, name: r.name, hasSelection: r.has_selection,
+  mode: r.mode, quotaPerDay: r.quota_per_day, quotaMinutes: r.quota_minutes,
+  updatedAt: r.updated_at.toISOString(),
 });
 
 const rowToPolicy = (r: any): Policy => ({
@@ -67,7 +70,7 @@ const rowToPolicy = (r: any): Policy => ({
 const rowToGrant = (r: any): Grant => ({
   id: r.id, groupId: r.group_id, minutes: r.minutes, reason: r.reason,
   startsAt: r.starts_at.toISOString(), expiresAt: r.expires_at.toISOString(),
-  status: r.status, updatedAt: r.updated_at.toISOString(),
+  status: r.status, source: r.source, updatedAt: r.updated_at.toISOString(),
 });
 
 const rowToDevice = (r: any): Device => ({
@@ -152,12 +155,24 @@ export class PgRepo implements Repo {
     return rows.map(rowToGrant);
   }
 
-  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date) {
+  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source: GrantSource = 'chat') {
     const { rows } = await this.pool.query(
-      'insert into grants (group_id, minutes, reason, expires_at) values ($1, $2, $3, $4) returning *',
-      [groupId, minutes, reason, expiresAt],
+      'insert into grants (group_id, minutes, reason, expires_at, source) values ($1, $2, $3, $4, $5) returning *',
+      [groupId, minutes, reason, expiresAt, source],
     );
     return rowToGrant(rows[0]);
+  }
+
+  async setGroupMode(id: string, mode: GroupMode, quotaPerDay?: number, quotaMinutes?: number) {
+    const { rows } = await this.pool.query(
+      `update groups set mode = $2,
+         quota_per_day = coalesce($3, quota_per_day),
+         quota_minutes = coalesce($4, quota_minutes),
+         updated_at = now()
+       where id = $1 returning *`,
+      [id, mode, quotaPerDay ?? null, quotaMinutes ?? null],
+    );
+    return rowToGroup(rows[0]);
   }
 
   async expireGrants(now: Date) {

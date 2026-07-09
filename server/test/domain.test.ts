@@ -46,7 +46,7 @@ describe('grantRemainingMinutes', () => {
   const grant: Grant = {
     id: 'g', groupId: '1', minutes: 15, reason: null,
     startsAt: '2026-07-08T12:00:00.000Z', expiresAt: '2026-07-08T12:15:00.000Z',
-    status: 'active', updatedAt: '2026-07-08T12:00:00.000Z',
+    status: 'active', source: 'chat', updatedAt: '2026-07-08T12:00:00.000Z',
   };
   it('rounds up remaining minutes and floors at 0', () => {
     expect(grantRemainingMinutes(grant, new Date('2026-07-08T12:00:30Z'))).toBe(15);
@@ -76,13 +76,13 @@ describe('buildSummary', () => {
     const grants: Grant[] = [{
       id: 'gr', groupId: '1', minutes: 15, reason: 'on the bus',
       startsAt: '2026-07-08T12:00:00.000Z', expiresAt: '2026-07-08T12:15:00.000Z',
-      status: 'expired', updatedAt: '2026-07-08T12:15:00.000Z',
+      status: 'expired', source: 'chat', updatedAt: '2026-07-08T12:15:00.000Z',
     }];
     const s = buildSummary({ events, grants, goal: { date: '2026-07-08', text: '3 focus hours', target: null }, groups });
     expect(s.goal?.text).toBe('3 focus hours');
     expect(s.shieldShown).toEqual({ Social: 2 });
     expect(s.shieldTaps).toBe(1);
     expect(s.thresholdsCrossed).toEqual([{ group: 'Social', thresholdMinutes: 30, at: '2026-07-08T14:00:00.000Z' }]);
-    expect(s.grantsUsed).toEqual([{ group: 'Social', minutes: 15, reason: 'on the bus' }]);
+    expect(s.grantsUsed).toEqual([{ group: 'Social', minutes: 15, reason: 'on the bus', source: 'chat' }]);
   });
 });

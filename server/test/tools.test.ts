@@ -28,7 +28,7 @@ async function setup() {
 }
 
 describe('MCP tools', () => {
-  it('lists all 12 tools', async () => {
+  it('lists all 13 tools', async () => {
     const { repo, push } = { repo: new FakeRepo(), push: new FakePush() };
     const server = buildMcpServer({ repo, push, config, now: () => NOW });
     const client = new Client({ name: 't', version: '0' });
@@ -37,8 +37,8 @@ describe('MCP tools', () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'block_now', 'create_group', 'get_status', 'get_summary_range', 'get_today_summary',
-      'grant_temp_access', 'list_groups', 'remove_policy', 'set_goal', 'set_limit',
-      'set_schedule', 'unblock',
+      'grant_temp_access', 'list_groups', 'remove_policy', 'set_goal', 'set_group_mode',
+      'set_limit', 'set_schedule', 'unblock',
     ]);
   });
 
@@ -142,6 +142,18 @@ describe('MCP tools', () => {
     expect(big.isError).toBe(true);
   });
 
+  it('set_group_mode updates mode and quota and shows in list_groups', async () => {
+    const { call } = await setup();
+    await call('create_group', { name: 'Instagram' });
+    const r = await call('set_group_mode', { group: 'Instagram', mode: 'strict' });
+    expect(r.json.mode).toBe('strict');
+    const q = await call('set_group_mode', { group: 'Instagram', mode: 'quota', quota_per_day: 3, quota_minutes: 5 });
+    expect(q.json.quotaPerDay).toBe(3);
+    expect(q.json.quotaMinutes).toBe(5);
+    const l = await call('list_groups');
+    expect(l.json.groups[0]).toMatchObject({ name: 'Instagram', mode: 'quota', quotaPerDay: 3, quotaMinutes: 5 });
+  });
+
   it('block_now cancels an active grant — later intent wins', async () => {
     const { repo, call } = await setup();
     await call('create_group', { name: 'Social' });
@@ -221,7 +233,7 @@ describe('MCP tools', () => {
     expect(r.json.goal.text).toBe('3 focus hours');
     expect(r.json.shieldShown).toEqual({ Social: 1 });
     expect(r.json.thresholdsCrossed[0].thresholdMinutes).toBe(30);
-    expect(r.json.grantsUsed).toEqual([{ group: 'Social', minutes: 15, reason: 'bus' }]);
+    expect(r.json.grantsUsed).toEqual([{ group: 'Social', minutes: 15, reason: 'bus', source: 'chat' }]);
   });
 
   it('get_status expires overdue grants and shows remaining minutes on live ones', async () => {

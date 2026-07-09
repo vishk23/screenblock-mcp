@@ -54,7 +54,8 @@ export function buildMcpServer(deps: Deps): McpServer {
         '- A group is a named set of apps (e.g. "Social"). Every policy and grant applies to a whole group.',
         '- Which apps are inside a group is invisible to you AND to the server — Apple privacy design. Only the user, in the iOS app, can see or change a group\'s apps. Never claim to know a group\'s contents.',
         '- If the user asks to block/limit/grant a SPECIFIC APP (e.g. "give me 15 min of Instagram") and no matching group exists: offer two options — (a) create a group named after that app (create_group), reminding them to pick the app in the iOS app once, or (b) apply the action to an existing group that plausibly contains it, saying clearly it affects the whole group.',
-        '- Groups may overlap. A grant on one group does NOT punch through another group\'s block yet — if both an "Instagram" group grant and a "Social" block cover the same app, the block wins. Warn the user when this could be the case.',
+        '- Groups may overlap. Grants PUNCH THROUGH other groups\' blocks for individually-picked apps (a grant on an "Instagram" group unblocks Instagram even while "Social" is blocked) — but NOT through category-based picks (opaque to subtraction). Prefer advising individual app picks.',
+        '- Unlock modes (set_group_mode): each group is "strict" (chat-only unlocks — you are the only door), "quota" (N self-serve unlocks/day from the device, reason required), or "open". Help the user pick strictness in advance; strict is a commitment device — confirm before setting it.',
         '',
         'Behavior rules:',
         '- block_now cancels active grants on that group (most recent instruction wins).',
@@ -100,7 +101,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     ]);
     const nameOf = (id: string) => groups.find((g) => g.id === id)?.name ?? 'unknown';
     return ok({
-      groups: groups.map((g) => ({ name: g.name, hasSelection: g.hasSelection })),
+      groups: groups.map((g) => ({ name: g.name, hasSelection: g.hasSelection, mode: g.mode })),
       policies: policies.map((p) => ({
         group: nameOf(p.groupId), ...policyView(p),
         delivery: deliveryState(p.updatedAt, devices),
@@ -126,6 +127,8 @@ export function buildMcpServer(deps: Deps): McpServer {
       groups: groups.map((g) => ({
         name: g.name,
         hasSelection: g.hasSelection,
+        mode: g.mode,
+        ...(g.mode === 'quota' ? { quotaPerDay: g.quotaPerDay, quotaMinutes: g.quotaMinutes } : {}),
         activePolicies: policies.filter((p) => p.groupId === g.id).length,
       })),
     });
@@ -267,6 +270,28 @@ export function buildMcpServer(deps: Deps): McpServer {
     if (removed === 0) return fail(`Group "${found.group.name}" has no active ${kind} policy.`);
     const delivery = await afterMutation(`Remove ${kind} from ${found.group.name}`, now().toISOString());
     return ok({ group: found.group.name, kind, removed, delivery });
+  });
+
+  server.registerTool('set_group_mode', {
+    title: 'Set a group\'s unlock mode',
+    description:
+      'Sets how the user may unlock this group from the device itself: "strict" = no device unlock at all, chat is the only door (maximum accountability — confirm the user wants this, it binds them); "quota" = N self-serve unlocks per day of quota_minutes each, reason required (default: 2×10min); "open" = unlock freely from the device. The user chooses their prison\'s strictness in advance, via conversation, not in the moment of temptation.',
+    inputSchema: {
+      group: z.string(),
+      mode: z.enum(['strict', 'quota', 'open']),
+      quota_per_day: z.number().int().min(0).max(20).optional(),
+      quota_minutes: z.number().int().min(1).max(60).optional(),
+    },
+  }, async ({ group: name, mode, quota_per_day, quota_minutes }) => {
+    const found = await findGroup(name);
+    if ('error' in found) return found.error;
+    const updated = await repo.setGroupMode(found.group.id, mode, quota_per_day, quota_minutes);
+    const delivery = await afterMutation(`${found.group.name} is now ${mode} mode`, updated.updatedAt);
+    return ok({
+      group: updated.name, mode: updated.mode,
+      quotaPerDay: updated.quotaPerDay, quotaMinutes: updated.quotaMinutes,
+      delivery,
+    });
   });
 
   server.registerTool('set_goal', {

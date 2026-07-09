@@ -1,9 +1,15 @@
 export type PolicyKind = 'schedule' | 'limit' | 'block';
 
+export type GroupMode = 'strict' | 'quota' | 'open';
+
 export interface Group {
   id: string;
   name: string;
   hasSelection: boolean;
+  /** strict = chat-only unlocks; quota = N self-serve unlocks/day; open = unblock freely. */
+  mode: GroupMode;
+  quotaPerDay: number;
+  quotaMinutes: number;
   updatedAt: string;
 }
 
@@ -26,6 +32,8 @@ export interface Policy {
 // delivery state.
 export type GrantStatus = 'pending' | 'active' | 'expired' | 'cancelled';
 
+export type GrantSource = 'chat' | 'device_quota';
+
 export interface Grant {
   id: string;
   groupId: string;
@@ -34,6 +42,7 @@ export interface Grant {
   startsAt: string;
   expiresAt: string;
   status: GrantStatus;
+  source: GrantSource;
   updatedAt: string;
 }
 
