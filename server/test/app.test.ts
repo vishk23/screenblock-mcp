@@ -37,6 +37,12 @@ describe('app wiring', () => {
     await request(app).post('/mcp/wrong-secret').send({}).expect(401);
   });
 
+  it('rejects /mcp with an incorrect Bearer token', async () => {
+    await request(app).post('/mcp')
+      .set('Authorization', 'Bearer wrong')
+      .send({}).expect(401);
+  });
+
   it('completes a real MCP handshake and tool call via secret-in-path', async () => {
     await repo.createGroup('Social');
     const transport = new StreamableHTTPClientTransport(new URL(`${baseUrl}/mcp/mcp-secret`));
@@ -70,6 +76,10 @@ describe('app wiring', () => {
   it('GET and DELETE on /mcp are not allowed (stateless mode)', async () => {
     await request(app).get('/mcp/mcp-secret').expect(405);
     await request(app).delete('/mcp/mcp-secret').expect(405);
+    // The bare /mcp GET/DELETE handlers are registered without mcpAuth,
+    // so they 405 with no credentials at all rather than 401.
+    await request(app).get('/mcp').expect(405);
+    await request(app).delete('/mcp').expect(405);
   });
 
   it('does not hang or crash when a tool handler rejects', async () => {
@@ -95,9 +105,18 @@ describe('app wiring', () => {
         const result = await client.callTool({ name: 'list_groups', arguments: {} });
         mcpErrored = result.isError === true;
       } catch (err) {
-        // The MCP SDK client throws on a JSON-RPC error response, or the
-        // underlying HTTP request can surface a non-2xx status.
+        // The MCP SDK client throws a StreamableHTTPError (code = HTTP
+        // status) when the underlying HTTP request surfaces a non-2xx
+        // status. Only accept errors that plainly indicate our error
+        // middleware's HTTP 500 (status.code === 500, or "500" appearing
+        // in the message the SDK builds from the response status/text);
+        // anything else (e.g. an unrelated transport failure like
+        // ECONNRESET) is unexpected and should fail the test loudly.
         const maybe = err as { code?: number } & { message?: string };
+        const looksLike500 = maybe.code === 500 || /\b500\b/.test(maybe.message ?? '');
+        if (!looksLike500) {
+          throw err;
+        }
         httpStatus = maybe.code;
         mcpErrored = true;
       }
