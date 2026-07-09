@@ -20,6 +20,7 @@ targets:
     dependencies:
       - target: ScreenCPMonitor
       - target: ScreenCPApplier
+      - target: ScreenCPShield
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp
@@ -50,6 +51,25 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.usernotifications.service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+  ScreenCPShield:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ScreenCPShield/Sources
+      - ScreenCP/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.shield
+        CODE_SIGN_ENTITLEMENTS: ScreenCPShield/ScreenCPShield.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: ScreenCPShield/Info.plist
+      properties:
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldDataSource
   ScreenCPMonitor:
     type: app-extension
     platform: iOS
