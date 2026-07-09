@@ -71,6 +71,15 @@ describe('device unlock endpoint (POST /device/grants)', () => {
     expect(r.body.remaining_today).toBeNull();
   });
 
+  it('device can create groups; duplicates return the existing group', async () => {
+    const { app, repo } = makeApp();
+    const r1 = await request(app).post('/device/groups').set(auth).send({ name: 'Social' }).expect(200);
+    expect(r1.body.existed).toBe(false);
+    const r2 = await request(app).post('/device/groups').set(auth).send({ name: 'social' }).expect(200);
+    expect(r2.body.existed).toBe(true);
+    expect(await repo.listGroups()).toHaveLength(1);
+  });
+
   it('unknown group 404', async () => {
     const { app } = makeApp();
     await request(app).post('/device/grants').set(auth)

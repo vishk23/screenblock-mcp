@@ -76,6 +76,16 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config }): Router {
     res.json({ grant, remaining_today: remainingToday });
   }));
 
+  /** First-run starter groups: the app may create groups too (names only, as ever). */
+  router.post('/groups', wrap(async (req, res) => {
+    const body = z.object({ name: z.string().trim().min(1).max(60) }).safeParse(req.body);
+    if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
+    const existing = await repo.listGroups();
+    const dup = existing.find((g) => g.name.toLowerCase() === body.data.name.toLowerCase());
+    if (dup) { res.json({ group: dup, existed: true }); return; }
+    res.json({ group: await repo.createGroup(body.data.name), existed: false });
+  }));
+
   router.post('/register', wrap(async (req, res) => {
     const body = z.object({ apnsToken: z.string().min(1) }).safeParse(req.body);
     if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
