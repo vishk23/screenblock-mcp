@@ -49,11 +49,14 @@ enum EnforcementEngine {
         store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
         store.shield.applicationCategories = selection.categoryTokens.isEmpty
             ? nil : .specific(selection.categoryTokens)
+        // Websites picked in the FamilyActivityPicker get shielded in Safari too.
+        store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
     }
 
     static func clearShield(_ store: ManagedSettingsStore) {
         store.shield.applications = nil
         store.shield.applicationCategories = nil
+        store.shield.webDomains = nil
     }
 
     /// True if `now` falls inside any active schedule policy window for the group (device-local time).
