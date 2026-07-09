@@ -21,6 +21,15 @@ describe('loadConfig', () => {
     expect(() => loadConfig({})).toThrow(/DATABASE_URL/);
   });
 
+  it('throws naming the offending var on a malformed numeric env var', () => {
+    expect(() => loadConfig({ ...base, PORT: 'abc' })).toThrow(/PORT/);
+  });
+
+  it('parses a valid numeric override', () => {
+    const c = loadConfig({ ...base, PORT: '9000' });
+    expect(c.port).toBe(9000);
+  });
+
   it('parses APNs config and unescapes the key when APNS_TEAM_ID is set', () => {
     const c = loadConfig({
       ...base,

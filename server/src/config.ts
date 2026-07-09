@@ -24,12 +24,19 @@ export function loadConfig(env: Env = process.env): Config {
     if (!v) throw new Error(`Missing required env var: ${k}`);
     return v;
   };
+  const num = (k: string, fallback: number): number => {
+    const v = env[k];
+    if (v === undefined) return fallback;
+    const n = Number(v);
+    if (!Number.isFinite(n)) throw new Error(`Invalid numeric env var: ${k}=${v}`);
+    return n;
+  };
   return {
-    port: Number(env.PORT ?? 8080),
+    port: num('PORT', 8080),
     databaseUrl: required('DATABASE_URL'),
     mcpBearerToken: required('MCP_BEARER_TOKEN'),
     deviceBearerToken: required('DEVICE_BEARER_TOKEN'),
-    maxGrantMinutes: Number(env.MAX_GRANT_MINUTES ?? 60),
+    maxGrantMinutes: num('MAX_GRANT_MINUTES', 60),
     timezone: env.TIMEZONE ?? 'America/Los_Angeles',
     apns: env.APNS_TEAM_ID
       ? {

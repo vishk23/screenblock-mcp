@@ -2,6 +2,7 @@ import type { Group, Device, Grant, Goal, EventRow } from './types.js';
 
 export function matchGroup(groups: Group[], query: string): Group | null {
   const q = query.trim().toLowerCase();
+  if (q === '') return null;
   const exact = groups.filter((g) => g.name.toLowerCase() === q);
   if (exact.length === 1) return exact[0];
   const prefix = groups.filter((g) => g.name.toLowerCase().startsWith(q));

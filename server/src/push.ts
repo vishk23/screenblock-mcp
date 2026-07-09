@@ -33,6 +33,9 @@ export class Ladder implements Push {
     await Promise.all(
       devices.map((d) => this.sender.sendSilent(d.apnsToken).catch(() => {})),
     );
+    // This timer intentionally no-ops (rather than being cancelled) when an ack lands
+    // before it fires; devices registered after the silent send still receive the
+    // visible fallback, which is desired — new devices need the policy too.
     const timer = setTimeout(() => {
       void (async () => {
         const latest = await this.repo.listDevices();

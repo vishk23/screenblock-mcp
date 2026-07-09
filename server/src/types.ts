@@ -21,6 +21,9 @@ export interface Policy {
   updatedAt: string;
 }
 
+// v1 never sets 'active' server-side — grants go pending→expired on the clock; the
+// device applies/reports via events, and applied-ness is conveyed by the separate
+// delivery state.
 export type GrantStatus = 'pending' | 'active' | 'expired' | 'cancelled';
 
 export interface Grant {

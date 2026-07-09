@@ -21,6 +21,11 @@ describe('matchGroup', () => {
     expect(matchGroup(groups, 'soc')).toBeNull();     // prefix of two, no exact
     expect(matchGroup(groups, 'games')).toBeNull();
   });
+  it('returns null on empty or whitespace-only query, even with a single group', () => {
+    const single = [g('1', 'Social')];
+    expect(matchGroup(single, '')).toBeNull();
+    expect(matchGroup(single, '   ')).toBeNull();
+  });
 });
 
 describe('deliveryState', () => {
