@@ -8,6 +8,8 @@ settings:
     DEVELOPMENT_TEAM: R78VP2V5AQ
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "5.9"
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
 targets:
   ScreenCP:
     type: application
@@ -23,8 +25,6 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         CODE_SIGN_ENTITLEMENTS: ScreenCP/ScreenCP.entitlements
         GENERATE_INFOPLIST_FILE: YES
-        MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "1"
   ScreenCPMonitor:
     type: app-extension
     platform: iOS
@@ -39,6 +39,8 @@ targets:
     info:
       path: ScreenCPMonitor/Info.plist
       properties:
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).MonitorExtension
