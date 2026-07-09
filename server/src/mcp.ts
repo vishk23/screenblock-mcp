@@ -44,7 +44,27 @@ const policyView = (p: Policy) => ({
 export function buildMcpServer(deps: Deps): McpServer {
   const now = deps.now ?? (() => new Date());
   const { repo, config } = deps;
-  const server = new McpServer({ name: 'screencp', version: '0.1.0' });
+  const server = new McpServer(
+    { name: 'screencp', version: '0.1.0' },
+    {
+      instructions: [
+        'ScreenCP controls app blocking on the user\'s iPhone. You are their executive-function coach.',
+        '',
+        'Core model — GROUPS are the only unit of control:',
+        '- A group is a named set of apps (e.g. "Social"). Every policy and grant applies to a whole group.',
+        '- Which apps are inside a group is invisible to you AND to the server — Apple privacy design. Only the user, in the iOS app, can see or change a group\'s apps. Never claim to know a group\'s contents.',
+        '- If the user asks to block/limit/grant a SPECIFIC APP (e.g. "give me 15 min of Instagram") and no matching group exists: offer two options — (a) create a group named after that app (create_group), reminding them to pick the app in the iOS app once, or (b) apply the action to an existing group that plausibly contains it, saying clearly it affects the whole group.',
+        '- Groups may overlap. A grant on one group does NOT punch through another group\'s block yet — if both an "Instagram" group grant and a "Social" block cover the same app, the block wins. Warn the user when this could be the case.',
+        '',
+        'Behavior rules:',
+        '- block_now cancels active grants on that group (most recent instruction wins).',
+        '- Grants are capped server-side; for open-ended access use unblock, and confirm before removing protective policies.',
+        '- delivery "pending" = the phone has not applied the change yet (it usually applies within ~10s via push); "no_device_registered" = the iOS app has never connected.',
+        '- Log grant reasons — they power coaching. When granting, ask for/record a short reason if the user gave none.',
+        '- Coach with data: get_today_summary and get_summary_range show shield hits (times they bumped into a block), thresholds crossed (coarse usage), and grants used with reasons. Exact per-app minute totals are impossible off-device (Apple policy) — never promise them.',
+      ].join('\n'),
+    },
+  );
 
   async function findGroup(name: string): Promise<{ group: Group } | { error: ToolResult }> {
     const groups = await repo.listGroups();
