@@ -20,7 +20,9 @@ export class Ladder implements Push {
   constructor(
     private repo: Repo,
     private sender: PushSender,
-    private fallbackMs = 15_000,
+    // Short leash: the NSE no-tap path (proven reliable) rides the visible push,
+    // so waiting long for the flaky silent push just adds dead air.
+    private fallbackMs = 8_000,
   ) {}
 
   policyChanged(changedAt: Date, description: string): void {
