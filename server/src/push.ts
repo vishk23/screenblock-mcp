@@ -92,16 +92,30 @@ export class ApnsSender implements PushSender {
   }
 
   async sendSilent(token: string): Promise<void> {
-    await this.client.send(new this.SilentNotification(token));
+    try {
+      await this.client.send(new this.SilentNotification(token));
+      console.log(`apns silent ok -> ${token.slice(0, 8)}`);
+    } catch (err) {
+      console.error(`apns silent FAILED -> ${token.slice(0, 8)}:`, err);
+      throw err;
+    }
   }
 
   async sendVisible(token: string, title: string, body: string): Promise<void> {
-    await this.client.send(
-      new this.Notification(token, {
-        alert: { title, body },
-        // Time-Sensitive so it pierces Focus modes (spec §7 rung 3).
-        aps: { 'interruption-level': 'time-sensitive' },
-      }),
-    );
+    try {
+      await this.client.send(
+        new this.Notification(token, {
+          alert: { title, body },
+          // mutable-content routes delivery through the Notification Service
+          // Extension on-device, which tries to apply the change with NO tap
+          // (spec §7 spike). Time-Sensitive pierces Focus modes (rung 3).
+          aps: { 'interruption-level': 'time-sensitive', 'mutable-content': 1 },
+        }),
+      );
+      console.log(`apns visible ok -> ${token.slice(0, 8)}`);
+    } catch (err) {
+      console.error(`apns visible FAILED -> ${token.slice(0, 8)}:`, err);
+      throw err;
+    }
   }
 }

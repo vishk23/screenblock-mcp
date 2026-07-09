@@ -15,6 +15,7 @@ function localDate(tsIso: string, timezone: string): string {
 }
 
 export class FakeRepo implements Repo {
+  constructor(private nowFn: () => Date = () => new Date()) {}
   groups: Group[] = [];
   policies: Policy[] = [];
   grants: Grant[] = [];
@@ -27,14 +28,14 @@ export class FakeRepo implements Repo {
 
   async createGroup(name: string): Promise<Group> {
     if (this.groups.some((g) => g.name === name)) throw new Error(`duplicate group: ${name}`);
-    const g: Group = { id: randomUUID(), name, hasSelection: false, updatedAt: iso(new Date()) };
+    const g: Group = { id: randomUUID(), name, hasSelection: false, updatedAt: iso(this.nowFn()) };
     this.groups.push(g);
     return g;
   }
 
   async setGroupSelection(id: string, hasSelection: boolean) {
     const g = this.groups.find((x) => x.id === id);
-    if (g) { g.hasSelection = hasSelection; g.updatedAt = iso(new Date()); }
+    if (g) { g.hasSelection = hasSelection; g.updatedAt = iso(this.nowFn()); }
   }
 
   async listPolicies(activeOnly = true) {
@@ -48,11 +49,11 @@ export class FakeRepo implements Repo {
   ): Promise<Policy> {
     for (const p of this.policies) {
       if (p.groupId === groupId && p.kind === kind && p.active) {
-        p.active = false; p.updatedAt = iso(new Date());
+        p.active = false; p.updatedAt = iso(this.nowFn());
       }
     }
     const policy: Policy = {
-      id: randomUUID(), groupId, kind, active: true, ...fields, updatedAt: iso(new Date()),
+      id: randomUUID(), groupId, kind, active: true, ...fields, updatedAt: iso(this.nowFn()),
     };
     this.policies.push(policy);
     return policy;
@@ -62,7 +63,7 @@ export class FakeRepo implements Repo {
     let n = 0;
     for (const p of this.policies) {
       if (p.groupId === groupId && p.active && (!kind || p.kind === kind)) {
-        p.active = false; p.updatedAt = iso(new Date()); n++;
+        p.active = false; p.updatedAt = iso(this.nowFn()); n++;
       }
     }
     return n;
@@ -75,8 +76,8 @@ export class FakeRepo implements Repo {
   async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date): Promise<Grant> {
     const grant: Grant = {
       id: randomUUID(), groupId, minutes, reason,
-      startsAt: iso(new Date()), expiresAt: iso(expiresAt),
-      status: 'pending', updatedAt: iso(new Date()),
+      startsAt: iso(this.nowFn()), expiresAt: iso(expiresAt),
+      status: 'pending', updatedAt: iso(this.nowFn()),
     };
     this.grants.push(grant);
     return grant;
@@ -86,7 +87,7 @@ export class FakeRepo implements Repo {
     let n = 0;
     for (const g of this.grants) {
       if ((g.status === 'pending' || g.status === 'active') && new Date(g.expiresAt) <= now) {
-        g.status = 'expired'; g.updatedAt = iso(new Date()); n++;
+        g.status = 'expired'; g.updatedAt = iso(this.nowFn()); n++;
       }
     }
     return n;
@@ -108,7 +109,7 @@ export class FakeRepo implements Repo {
         id: ++this.eventId,
         groupId: e.groupId ?? null,
         type: e.type,
-        ts: e.ts ?? iso(new Date()),
+        ts: e.ts ?? iso(this.nowFn()),
         meta: e.meta ?? {},
       });
     }
@@ -121,8 +122,8 @@ export class FakeRepo implements Repo {
 
   async registerDevice(apnsToken: string): Promise<Device> {
     const existing = this.devices.find((d) => d.apnsToken === apnsToken);
-    if (existing) { existing.lastSeenAt = iso(new Date()); return existing; }
-    const d: Device = { id: randomUUID(), apnsToken, appliedThrough: null, lastSeenAt: iso(new Date()) };
+    if (existing) { existing.lastSeenAt = iso(this.nowFn()); return existing; }
+    const d: Device = { id: randomUUID(), apnsToken, appliedThrough: null, lastSeenAt: iso(this.nowFn()) };
     this.devices.push(d);
     return d;
   }
@@ -131,7 +132,7 @@ export class FakeRepo implements Repo {
 
   async ackDevice(apnsToken: string, appliedThrough: Date) {
     const d = this.devices.find((x) => x.apnsToken === apnsToken);
-    if (d) { d.appliedThrough = iso(appliedThrough); d.lastSeenAt = iso(new Date()); }
+    if (d) { d.appliedThrough = iso(appliedThrough); d.lastSeenAt = iso(this.nowFn()); }
   }
 
   async changesSince(since: Date | null): Promise<SyncPayload> {
@@ -140,7 +141,7 @@ export class FakeRepo implements Repo {
       groups: this.groups.filter((g) => newer(g.updatedAt)),
       policies: this.policies.filter((p) => newer(p.updatedAt)),
       grants: this.grants.filter((g) => newer(g.updatedAt)),
-      serverTime: iso(new Date()),
+      serverTime: iso(this.nowFn()),
     };
   }
 }

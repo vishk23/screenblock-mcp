@@ -13,7 +13,7 @@ const config: Config = {
 };
 
 async function setup() {
-  const repo = new FakeRepo();
+  const repo = new FakeRepo(() => NOW);
   const push = new FakePush();
   const server = buildMcpServer({ repo, push, config, now: () => NOW });
   const client = new Client({ name: 'test', version: '0.0.0' });

@@ -19,6 +19,7 @@ targets:
       - ScreenCP/Shared
     dependencies:
       - target: ScreenCPMonitor
+      - target: ScreenCPApplier
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp
@@ -29,6 +30,26 @@ targets:
       path: ScreenCP/Info.plist
       properties:
         UIBackgroundModes: [remote-notification]
+  ScreenCPApplier:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ScreenCPApplier/Sources
+      - ScreenCP/Shared
+      - ScreenCP/Sources/Secrets.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.applier
+        CODE_SIGN_ENTITLEMENTS: ScreenCPApplier/ScreenCPApplier.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: ScreenCPApplier/Info.plist
+      properties:
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
   ScreenCPMonitor:
     type: app-extension
     platform: iOS
