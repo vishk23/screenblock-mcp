@@ -4,7 +4,27 @@ import FamilyControls
 struct ContentView: View {
     @StateObject private var sync = SyncCoordinator()
     @State private var authStatus = AuthorizationCenter.shared.authorizationStatus
+    @State private var unlockGroup: RemoteGroup?
+    @State private var creatingStarters = false
     @Environment(\.scenePhase) private var scenePhase
+
+    /// Shield "Request time" button routes here via the ShieldAction extension.
+    private func consumePendingUnlock() {
+        guard let gid = AppGroupStore.suite.string(forKey: "pendingUnlockGroupId"), !gid.isEmpty else { return }
+        AppGroupStore.suite.removeObject(forKey: "pendingUnlockGroupId")
+        unlockGroup = sync.groups.first { $0.id == gid } ?? AppGroupStore.groups.first { $0.id == gid }
+    }
+
+    private func createStarterGroups() {
+        creatingStarters = true
+        Task {
+            for name in ["Social", "Games", "Entertainment"] {
+                try? await BackendClient.live.createGroup(name: name)
+            }
+            await sync.syncNow()
+            creatingStarters = false
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -22,8 +42,12 @@ struct ContentView: View {
 
                 Section("Groups") {
                     if sync.groups.isEmpty {
-                        Text("No groups yet. Ask ChatGPT to create one, then pull to refresh.")
+                        Text("No groups yet. Ask ChatGPT to create one — or start with the basics:")
                             .foregroundStyle(.secondary)
+                        Button(creatingStarters ? "Creating…" : "Create starter groups (Social, Games, Entertainment)") {
+                            createStarterGroups()
+                        }
+                        .disabled(creatingStarters)
                     }
                     ForEach(sync.groups) { group in
                         NavigationLink {
@@ -50,7 +74,15 @@ struct ContentView: View {
             .refreshable { await sync.syncNow() }
             .task { await sync.syncNow() }
             .onChange(of: scenePhase) { phase in
-                if phase == .active { Task { await sync.syncNow() } }
+                if phase == .active {
+                    Task {
+                        await sync.syncNow()
+                        consumePendingUnlock()
+                    }
+                }
+            }
+            .sheet(item: $unlockGroup) { group in
+                UnlockSheet(group: group, sync: sync)
             }
         }
     }
@@ -78,8 +110,26 @@ struct GroupDetailView: View {
     @State private var selection = FamilyActivitySelection()
     @State private var pickerPresented = false
 
+    @State private var unlockPresented = false
+
     var body: some View {
         Form {
+            Section {
+                if group.mode == "strict" {
+                    Label("Strict mode — unlocks only through your ChatGPT coach", systemImage: "lock.fill")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Button {
+                        unlockPresented = true
+                    } label: {
+                        Label("Request time now", systemImage: "hourglass")
+                    }
+                }
+            } footer: {
+                Text(group.mode == "quota"
+                     ? "\(group.quotaPerDay) self-serve unlocks of \(group.quotaMinutes) min per day, reason required."
+                     : group.mode == "open" ? "Open mode — unlock freely." : "")
+            }
             Section("Apps in this group") {
                 Button("Choose apps (\(selection.applicationTokens.count) apps, \(selection.categoryTokens.count) categories)") {
                     pickerPresented = true
@@ -101,6 +151,7 @@ struct GroupDetailView: View {
             }
         }
         .navigationTitle(group.name)
+        .sheet(isPresented: $unlockPresented) { UnlockSheet(group: group, sync: sync) }
         .familyActivityPicker(isPresented: $pickerPresented, selection: $selection)
         .onAppear { selection = AppGroupStore.selection(for: group.id) ?? FamilyActivitySelection() }
         .onChange(of: pickerPresented) { presented in

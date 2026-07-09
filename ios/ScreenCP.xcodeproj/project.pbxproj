@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0329E9BD4E86C588B0C94697 /* ShieldActionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7587888E97478D128AE65CF0 /* ShieldActionHandler.swift */; };
 		2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */; };
 		2796E3A1CA204E26FB9C7D01 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		39C95B2EC3490D5C2F7846F6 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F108E947B409386ACE147906 /* SyncService.swift */; };
 		478657F796AA6E87613E5492 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
@@ -17,7 +19,9 @@
 		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8627215CEE37FE8C2141D561 /* UnlockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B134360FE0EE229150729A /* UnlockSheet.swift */; };
 		87CB99F6A268ACF324277FF0 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171183459AF315FD2CBFC7F8 /* NotificationService.swift */; };
+		88DDB3B07B4CF5596A4D2965 /* ScreenCPShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8C8461D5B9213E346050B4C4 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		92DECF3A92E409F10B870C9A /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		96B6E681ED743ED067FD7BE9 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
@@ -26,11 +30,13 @@
 		A7FFEA15FD70A8E1B9382C52 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */; };
 		B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */; };
+		B2990C2DA0DBD43591A768D1 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
 		BB847333C9AFEBAD6773923C /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
 		C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */; };
 		D68B3A76A2832F04E2BF582A /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		DB3EF94D5128649632BD4B59 /* ScreenCPApplier.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E0EBC64CBEA99880165686BB /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		E5D4301365A5312823E0E919 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
 		F5F533C19502C1CE67C1B8D9 /* BackendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6945394780099D6AC387EE /* BackendClient.swift */; };
 		FD1BFD127E76091EFF02C083 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
@@ -51,6 +57,13 @@
 			remoteGlobalIDString = 7A06FC26E8FE4C448D42309F;
 			remoteInfo = ScreenCPMonitor;
 		};
+		F3A0E80E34098EE69E706841 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 359F9B31ADA8C15722BA4FC4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1A40A62F928A04B65206C8D;
+			remoteInfo = ScreenCPShieldAction;
+		};
 		FC8E43341F9E244E3C86FBF1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 359F9B31ADA8C15722BA4FC4 /* Project object */;
@@ -70,6 +83,7 @@
 				6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */,
 				DB3EF94D5128649632BD4B59 /* ScreenCPApplier.appex in Embed Foundation Extensions */,
 				6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */,
+				88DDB3B07B4CF5596A4D2965 /* ScreenCPShieldAction.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -79,12 +93,14 @@
 /* Begin PBXFileReference section */
 		171183459AF315FD2CBFC7F8 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		23B134360FE0EE229150729A /* UnlockSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockSheet.swift; sourceTree = "<group>"; };
 		2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
 		2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPApplier.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorExtension.swift; sourceTree = "<group>"; };
 		5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5F7341B4D1B1435CAFE58912 /* ScreenCP.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScreenCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E6945394780099D6AC387EE /* BackendClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendClient.swift; sourceTree = "<group>"; };
+		7587888E97478D128AE65CF0 /* ShieldActionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionHandler.swift; sourceTree = "<group>"; };
 		75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		841BBC193A5364DD09CBF2FF /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		886279C61F03185BE6C3B80D /* ShieldDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldDataSource.swift; sourceTree = "<group>"; };
@@ -94,6 +110,7 @@
 		975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnforcementEngine.swift; sourceTree = "<group>"; };
 		9A3131938E0438D2114E0E7C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
+		B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F108E947B409386ACE147906 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,8 +132,18 @@
 				30690A32FF9187C31BBBDA53 /* Sources */,
 				29E000773319743297D94698 /* Sources */,
 				0CA908DED08CF32EBCAD433C /* Sources */,
+				29637599772451748125C4F1 /* Sources */,
 				4B0E68F28C1B35EAB9CAAC8F /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		29637599772451748125C4F1 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				7587888E97478D128AE65CF0 /* ShieldActionHandler.swift */,
+			);
+			name = Sources;
+			path = ScreenCPShieldAction/Sources;
 			sourceTree = "<group>";
 		};
 		29E000773319743297D94698 /* Sources */ = {
@@ -144,6 +171,7 @@
 				2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */,
 				1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */,
 				75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */,
+				B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -170,6 +198,7 @@
 				91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */,
 				9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */,
 				F108E947B409386ACE147906 /* SyncService.swift */,
+				23B134360FE0EE229150729A /* UnlockSheet.swift */,
 			);
 			name = Sources;
 			path = ScreenCP/Sources;
@@ -191,6 +220,7 @@
 				5B7B43A40E5374C9A33C3D67 /* PBXTargetDependency */,
 				485CF8AAE38C231D9BE10C91 /* PBXTargetDependency */,
 				8F934F37AEC029A2E18291DB /* PBXTargetDependency */,
+				9F5BB7C49FEEF24C3372BDF0 /* PBXTargetDependency */,
 			);
 			name = ScreenCP;
 			packageProductDependencies = (
@@ -250,6 +280,23 @@
 			productReference = 2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		A1A40A62F928A04B65206C8D /* ScreenCPShieldAction */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C1F0806A2E2876AA52A9313 /* Build configuration list for PBXNativeTarget "ScreenCPShieldAction" */;
+			buildPhases = (
+				6A8086CCF60E5CC15CA20EF7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScreenCPShieldAction;
+			packageProductDependencies = (
+			);
+			productName = ScreenCPShieldAction;
+			productReference = B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -275,6 +322,10 @@
 						DevelopmentTeam = R78VP2V5AQ;
 						ProvisioningStyle = Automatic;
 					};
+					A1A40A62F928A04B65206C8D = {
+						DevelopmentTeam = R78VP2V5AQ;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = F578E0F1DB58A3B74FC76321 /* Build configuration list for PBXProject "ScreenCP" */;
@@ -295,6 +346,7 @@
 				9E80943E1C7AAF8991356FD9 /* ScreenCPApplier */,
 				7A06FC26E8FE4C448D42309F /* ScreenCPMonitor */,
 				1CE3AE8BD714CF801F081740 /* ScreenCPShield */,
+				A1A40A62F928A04B65206C8D /* ScreenCPShieldAction */,
 			);
 		};
 /* End PBXProject section */
@@ -319,6 +371,17 @@
 				E5D4301365A5312823E0E919 /* EnforcementEngine.swift in Sources */,
 				8C8461D5B9213E346050B4C4 /* Models.swift in Sources */,
 				2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6A8086CCF60E5CC15CA20EF7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0EBC64CBEA99880165686BB /* AppGroupStore.swift in Sources */,
+				B2990C2DA0DBD43591A768D1 /* EnforcementEngine.swift in Sources */,
+				2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */,
+				0329E9BD4E86C588B0C94697 /* ShieldActionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,6 +412,7 @@
 				5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */,
 				B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */,
 				3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */,
+				8627215CEE37FE8C2141D561 /* UnlockSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,6 +433,11 @@
 			isa = PBXTargetDependency;
 			target = 1CE3AE8BD714CF801F081740 /* ScreenCPShield */;
 			targetProxy = FC8E43341F9E244E3C86FBF1 /* PBXContainerItemProxy */;
+		};
+		9F5BB7C49FEEF24C3372BDF0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1A40A62F928A04B65206C8D /* ScreenCPShieldAction */;
+			targetProxy = F3A0E80E34098EE69E706841 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -404,6 +473,23 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4A1D37FA68E2F4FA248FE1B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScreenCPShieldAction/ScreenCPShieldAction.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenCPShieldAction/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.shieldaction;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -640,6 +726,23 @@
 			};
 			name = Release;
 		};
+		F2DD4EB772BC618FC9F0E076 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScreenCPShieldAction/ScreenCPShieldAction.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenCPShieldAction/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.shieldaction;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -648,6 +751,15 @@
 			buildConfigurations = (
 				496292AFF012608DD08F8E6E /* Debug */,
 				F2DBE6A8B8843F9BD93FE156 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6C1F0806A2E2876AA52A9313 /* Build configuration list for PBXNativeTarget "ScreenCPShieldAction" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A1D37FA68E2F4FA248FE1B7 /* Debug */,
+				F2DD4EB772BC618FC9F0E076 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

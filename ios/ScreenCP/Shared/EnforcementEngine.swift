@@ -20,6 +20,19 @@ enum EnforcementEngine {
         }
     }
 
+    /// PUNCH-THROUGH: app tokens exempted by an active grant on ANY group.
+    /// A grant on "Instagram" unblocks Instagram even while "Social" is blocked.
+    /// Category tokens cannot be subtracted (opaque) — app-token picks only.
+    static func grantExemptTokens(grants: [RemoteGrant], now: Date = Date()) -> Set<ApplicationToken> {
+        var exempt = Set<ApplicationToken>()
+        for group in AppGroupStore.groups where activeGrant(for: group.id, in: grants, now: now) != nil {
+            if let sel = AppGroupStore.selection(for: group.id) {
+                exempt.formUnion(sel.applicationTokens)
+            }
+        }
+        return exempt
+    }
+
     /// Apply the current shield state for one group (block policies + grants).
     /// Schedules/limits are OS-scheduled separately in `reconcileSchedules`.
     static func applyImmediateShield(groupId: String, policies: [RemotePolicy], grants: [RemoteGrant], now: Date = Date()) {
@@ -36,17 +49,25 @@ enum EnforcementEngine {
                 && (p.until == nil || (ISO.date(p.until!).map { $0 > now } ?? true))
         }
 
-        if blocked {
-            shield(store, selection: selection)
-        } else if !scheduleWindowActive(groupId: groupId, policies: policies, now: now) {
-            // Only clear if no schedule window is currently holding a shield —
-            // the monitor extension owns shields inside schedule windows.
+        if blocked || scheduleWindowActive(groupId: groupId, policies: policies, now: now) {
+            // Re-asserting inside a schedule window keeps punch-through exemptions
+            // current even when the monitor extension set the original shield.
+            shield(store, selection: selection, exempt: grantExemptTokens(grants: grants, now: now))
+        } else {
             clearShield(store)
         }
     }
 
-    static func shield(_ store: ManagedSettingsStore, selection: FamilyActivitySelection) {
-        store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
+    /// Re-apply every group's immediate shield (grant start/expiry changes exemptions everywhere).
+    static func applyAllImmediateShields(policies: [RemotePolicy], grants: [RemoteGrant], now: Date = Date()) {
+        for group in AppGroupStore.groups {
+            applyImmediateShield(groupId: group.id, policies: policies, grants: grants, now: now)
+        }
+    }
+
+    static func shield(_ store: ManagedSettingsStore, selection: FamilyActivitySelection, exempt: Set<ApplicationToken> = []) {
+        let apps = selection.applicationTokens.subtracting(exempt)
+        store.shield.applications = apps.isEmpty ? nil : apps
         store.shield.applicationCategories = selection.categoryTokens.isEmpty
             ? nil : .specific(selection.categoryTokens)
         // Websites picked in the FamilyActivityPicker get shielded in Safari too.

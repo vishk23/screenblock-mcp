@@ -6,6 +6,9 @@ struct RemoteGroup: Codable, Identifiable, Hashable {
     let id: String
     let name: String
     let hasSelection: Bool
+    let mode: String        // "strict" | "quota" | "open"
+    let quotaPerDay: Int
+    let quotaMinutes: Int
     let updatedAt: String
 }
 
@@ -31,6 +34,7 @@ struct RemoteGrant: Codable, Identifiable, Hashable {
     let startsAt: String
     let expiresAt: String
     let status: String // pending | active | expired | cancelled
+    let source: String // chat | device_quota
     let updatedAt: String
 }
 

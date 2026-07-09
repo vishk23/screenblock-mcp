@@ -30,7 +30,8 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
             title: .init(text: "Blocked by ScreenCP", color: .white),
             subtitle: .init(text: "Ask ChatGPT if you need time here.", color: .lightGray),
             primaryButtonLabel: .init(text: "OK", color: .black),
-            primaryButtonBackgroundColor: .white
+            primaryButtonBackgroundColor: .white,
+            secondaryButtonLabel: .init(text: "Request time", color: .white)
         )
     }
 

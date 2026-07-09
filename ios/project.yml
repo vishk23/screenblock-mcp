@@ -21,6 +21,7 @@ targets:
       - target: ScreenCPMonitor
       - target: ScreenCPApplier
       - target: ScreenCPShield
+      - target: ScreenCPShieldAction
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp
@@ -51,6 +52,25 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.usernotifications.service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+  ScreenCPShieldAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ScreenCPShieldAction/Sources
+      - ScreenCP/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.shieldaction
+        CODE_SIGN_ENTITLEMENTS: ScreenCPShieldAction/ScreenCPShieldAction.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: ScreenCPShieldAction/Info.plist
+      properties:
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-action-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldActionHandler
   ScreenCPShield:
     type: app-extension
     platform: iOS

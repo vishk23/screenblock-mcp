@@ -42,14 +42,13 @@ final class MonitorExtension: DeviceActivityMonitor {
                     grants[i] = RemoteGrant(
                         id: grants[i].id, groupId: grants[i].groupId, minutes: grants[i].minutes,
                         reason: grants[i].reason, startsAt: grants[i].startsAt,
-                        expiresAt: grants[i].expiresAt, status: "expired", updatedAt: grants[i].updatedAt)
+                        expiresAt: grants[i].expiresAt, status: "expired",
+                        source: grants[i].source, updatedAt: grants[i].updatedAt)
                 }
             }
             AppGroupStore.grants = grants
-            EnforcementEngine.applyImmediateShield(groupId: groupId, policies: AppGroupStore.policies, grants: grants)
-            if EnforcementEngine.scheduleWindowActive(groupId: groupId, policies: AppGroupStore.policies) {
-                applyShield(groupId)
-            }
+            // Grant expiry changes punch-through exemptions for every group.
+            EnforcementEngine.applyAllImmediateShields(policies: AppGroupStore.policies, grants: grants)
             AppGroupStore.appendEvent(DeviceEvent(type: "grant_expired", groupId: groupId))
         default:
             break
@@ -77,6 +76,8 @@ final class MonitorExtension: DeviceActivityMonitor {
     private func applyShield(_ groupId: String) {
         guard let selection = AppGroupStore.selection(for: groupId) else { return }
         let store = ManagedSettingsStore(named: EnforcementEngine.storeName(groupId))
-        EnforcementEngine.shield(store, selection: selection)
+        EnforcementEngine.shield(
+            store, selection: selection,
+            exempt: EnforcementEngine.grantExemptTokens(grants: AppGroupStore.grants))
     }
 }
