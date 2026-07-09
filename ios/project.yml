@@ -25,6 +25,10 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         CODE_SIGN_ENTITLEMENTS: ScreenCP/ScreenCP.entitlements
         GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: ScreenCP/Info.plist
+      properties:
+        UIBackgroundModes: [remote-notification]
   ScreenCPMonitor:
     type: app-extension
     platform: iOS

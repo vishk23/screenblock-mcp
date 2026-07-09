@@ -61,8 +61,16 @@ enum AppGroupStore {
         set { suite.set(newValue, forKey: "lastSyncServerTime") }
     }
 
-    /// Stable pseudo-token identifying this install until real APNs registration (M4).
+    /// Real APNs token (hex), set once registration succeeds.
+    static var apnsToken: String? {
+        get { suite.string(forKey: "apnsToken") }
+        set { suite.set(newValue, forKey: "apnsToken") }
+    }
+
+    /// Token this device is known by server-side: real APNs token when available,
+    /// otherwise a stable local pseudo-token (pre-push installs, simulators).
     static var deviceToken: String {
+        if let t = apnsToken { return t }
         if let t = suite.string(forKey: "deviceToken") { return t }
         let t = "local-\(UUID().uuidString)"
         suite.set(t, forKey: "deviceToken")
