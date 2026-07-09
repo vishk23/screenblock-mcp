@@ -28,7 +28,7 @@ async function setup() {
 }
 
 describe('MCP tools', () => {
-  it('lists all 11 tools', async () => {
+  it('lists all 12 tools', async () => {
     const { repo, push } = { repo: new FakeRepo(), push: new FakePush() };
     const server = buildMcpServer({ repo, push, config, now: () => NOW });
     const client = new Client({ name: 't', version: '0' });
@@ -36,8 +36,9 @@ describe('MCP tools', () => {
     await Promise.all([server.connect(st), client.connect(ct)]);
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
-      'block_now', 'create_group', 'get_status', 'get_today_summary', 'grant_temp_access',
-      'list_groups', 'remove_policy', 'set_goal', 'set_limit', 'set_schedule', 'unblock',
+      'block_now', 'create_group', 'get_status', 'get_summary_range', 'get_today_summary',
+      'grant_temp_access', 'list_groups', 'remove_policy', 'set_goal', 'set_limit',
+      'set_schedule', 'unblock',
     ]);
   });
 
@@ -117,6 +118,28 @@ describe('MCP tools', () => {
     expect(r.json.grant.minutes).toBe(60);
     expect(r.json.note).toMatch(/capped at 60/);
     expect(r.json.grant.expiresAt).toBe('2026-07-08T13:00:00.000Z');
+  });
+
+  it('get_summary_range aggregates days and totals', async () => {
+    const { repo, call } = await setup();
+    const { json: created } = await call('create_group', { name: 'Social' });
+    await repo.insertEvents([
+      { type: 'shield_shown', groupId: created.group.id, ts: '2026-07-07T19:00:00Z' }, // Jul 7 LA
+      { type: 'shield_shown', groupId: created.group.id, ts: '2026-07-08T19:00:00Z' }, // Jul 8 LA
+      { type: 'shield_shown', groupId: created.group.id, ts: '2026-07-08T20:00:00Z' },
+    ]);
+    await call('grant_temp_access', { group: 'Social', minutes: 15, reason: 'bus' });
+    const r = await call('get_summary_range', { start_date: '2026-07-07', end_date: '2026-07-08' });
+    expect(r.json.daily).toHaveLength(2);
+    expect(r.json.daily[0].shieldShown).toEqual({ Social: 1 });
+    expect(r.json.daily[1].shieldShown).toEqual({ Social: 2 });
+    expect(r.json.totals).toEqual({
+      shieldShown: 3, shieldTaps: 0, thresholdsCrossed: 0, grantsUsed: 1, grantMinutes: 15,
+    });
+    const bad = await call('get_summary_range', { start_date: '2026-07-08', end_date: '2026-07-07' });
+    expect(bad.isError).toBe(true);
+    const big = await call('get_summary_range', { start_date: '2026-01-01', end_date: '2026-03-01' });
+    expect(big.isError).toBe(true);
   });
 
   it('block_now cancels an active grant — later intent wins', async () => {

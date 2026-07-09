@@ -283,5 +283,46 @@ export function buildMcpServer(deps: Deps): McpServer {
     return ok({ date: day, ...buildSummary({ events, grants: dayGrants, goal, groups }) });
   });
 
+  server.registerTool('get_summary_range', {
+    title: 'Get multi-day adherence summary',
+    description:
+      'Read-only. Per-day adherence summaries for a date range (max 31 days) plus range totals — for coaching on trends: shield hits per day, thresholds crossed, grants used with reasons, goals. Dates are YYYY-MM-DD in the user\'s home timezone.',
+    inputSchema: {
+      start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    },
+    annotations: { readOnlyHint: true },
+  }, async ({ start_date, end_date }) => {
+    const start = new Date(`${start_date}T00:00:00Z`);
+    const end = new Date(`${end_date}T00:00:00Z`);
+    const days = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+    if (Number.isNaN(days) || days < 1) return fail('end_date must be on or after start_date.');
+    if (days > 31) return fail('Range too large — max 31 days.');
+
+    await repo.expireGrants(now());
+    const [allGrants, groups] = await Promise.all([repo.listGrants(), repo.listGroups()]);
+
+    const daily = [];
+    const totals = { shieldShown: 0, shieldTaps: 0, thresholdsCrossed: 0, grantsUsed: 0, grantMinutes: 0 };
+    for (let i = 0; i < days; i++) {
+      const date = new Date(start.getTime() + i * 86_400_000).toISOString().slice(0, 10);
+      const [events, goal] = await Promise.all([
+        repo.listEventsOn(date, config.timezone),
+        repo.getGoal(date),
+      ]);
+      const dayGrants = allGrants.filter(
+        (g) => todayInTz(config.timezone, new Date(g.startsAt)) === date && g.status !== 'cancelled',
+      );
+      const s = buildSummary({ events, grants: dayGrants, goal, groups });
+      totals.shieldShown += Object.values(s.shieldShown).reduce((a, b) => a + b, 0);
+      totals.shieldTaps += s.shieldTaps;
+      totals.thresholdsCrossed += s.thresholdsCrossed.length;
+      totals.grantsUsed += s.grantsUsed.length;
+      totals.grantMinutes += s.grantsUsed.reduce((a, g) => a + g.minutes, 0);
+      daily.push({ date, ...s });
+    }
+    return ok({ start: start_date, end: end_date, totals, daily });
+  });
+
   return server;
 }

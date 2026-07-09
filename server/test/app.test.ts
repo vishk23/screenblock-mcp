@@ -49,7 +49,7 @@ describe('app wiring', () => {
     const client = new Client({ name: 'e2e-test', version: '0.0.0' });
     await client.connect(transport);
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(11);
+    expect(tools).toHaveLength(12);
     const result = await client.callTool({ name: 'list_groups', arguments: {} });
     const payload = JSON.parse((result.content as Array<{ text: string }>)[0].text);
     expect(payload.groups[0].name).toBe('Social');
@@ -63,7 +63,7 @@ describe('app wiring', () => {
     const client = new Client({ name: 'e2e-test-2', version: '0.0.0' });
     await client.connect(transport);
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(11);
+    expect(tools).toHaveLength(12);
     await client.close();
   });
 
