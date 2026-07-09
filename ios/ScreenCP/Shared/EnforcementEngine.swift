@@ -51,12 +51,17 @@ enum EnforcementEngine {
             ? nil : .specific(selection.categoryTokens)
         // Websites picked in the FamilyActivityPicker get shielded in Safari too.
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
+        // Category picks also shield that category's WEBSITES (e.g. Social category
+        // blocks instagram.com in Safari), including sites never visited before.
+        store.shield.webDomainCategories = selection.categoryTokens.isEmpty
+            ? nil : .specific(selection.categoryTokens)
     }
 
     static func clearShield(_ store: ManagedSettingsStore) {
         store.shield.applications = nil
         store.shield.applicationCategories = nil
         store.shield.webDomains = nil
+        store.shield.webDomainCategories = nil
     }
 
     /// True if `now` falls inside any active schedule policy window for the group (device-local time).
