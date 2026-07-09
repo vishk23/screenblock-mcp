@@ -1,0 +1,137 @@
+import SwiftUI
+import FamilyControls
+
+struct ContentView: View {
+    @StateObject private var sync = SyncCoordinator()
+    @State private var authStatus = AuthorizationCenter.shared.authorizationStatus
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                if authStatus != .approved {
+                    Section {
+                        Button("Enable Screen Time Access") {
+                            Task {
+                                try? await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+                                authStatus = AuthorizationCenter.shared.authorizationStatus
+                            }
+                        }
+                    } header: { Text("Setup required") }
+                }
+
+                Section("Groups") {
+                    if sync.groups.isEmpty {
+                        Text("No groups yet. Ask ChatGPT to create one, then pull to refresh.")
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(sync.groups) { group in
+                        NavigationLink {
+                            GroupDetailView(group: group, sync: sync)
+                        } label: {
+                            GroupRow(group: group, policies: sync.policies)
+                        }
+                    }
+                }
+
+                Section("Sync") {
+                    LabeledContent("Last sync", value: sync.lastSync.map { $0.formatted(date: .omitted, time: .standard) } ?? "never")
+                    if let err = sync.lastError {
+                        Text(err).font(.footnote).foregroundStyle(.red)
+                    }
+                    Button("Sync now") { Task { await sync.syncNow() } }
+                }
+
+                Section {
+                    NavigationLink("Debug: manual shield spike") { SpikeView() }
+                }
+            }
+            .navigationTitle("ScreenCP")
+            .refreshable { await sync.syncNow() }
+            .task { await sync.syncNow() }
+            .onChange(of: scenePhase) { phase in
+                if phase == .active { Task { await sync.syncNow() } }
+            }
+        }
+    }
+}
+
+struct GroupRow: View {
+    let group: RemoteGroup
+    let policies: [RemotePolicy]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(group.name)
+            let has = AppGroupStore.selection(for: group.id).map(EnforcementEngine.hasContent) ?? false
+            let count = policies.filter { $0.groupId == group.id }.count
+            Text(has ? "\(count) active polic\(count == 1 ? "y" : "ies")" : "⚠️ no apps selected — tap to choose")
+                .font(.caption)
+                .foregroundStyle(has ? Color.secondary : Color.orange)
+        }
+    }
+}
+
+struct GroupDetailView: View {
+    let group: RemoteGroup
+    @ObservedObject var sync: SyncCoordinator
+    @State private var selection = FamilyActivitySelection()
+    @State private var pickerPresented = false
+
+    var body: some View {
+        Form {
+            Section("Apps in this group") {
+                Button("Choose apps (\(selection.applicationTokens.count) apps, \(selection.categoryTokens.count) categories)") {
+                    pickerPresented = true
+                }
+            }
+            Section("Policies (managed from ChatGPT)") {
+                let groupPolicies = sync.policies.filter { $0.groupId == group.id }
+                if groupPolicies.isEmpty { Text("None").foregroundStyle(.secondary) }
+                ForEach(groupPolicies) { p in
+                    PolicyRow(policy: p)
+                }
+                let grants = sync.grants.filter {
+                    $0.groupId == group.id && EnforcementEngine.activeGrant(for: group.id, in: [$0]) != nil
+                }
+                ForEach(grants) { g in
+                    Label("Temporary access until \(ISO.date(g.expiresAt)?.formatted(date: .omitted, time: .shortened) ?? g.expiresAt)", systemImage: "clock")
+                        .foregroundStyle(.green)
+                }
+            }
+        }
+        .navigationTitle(group.name)
+        .familyActivityPicker(isPresented: $pickerPresented, selection: $selection)
+        .onAppear { selection = AppGroupStore.selection(for: group.id) ?? FamilyActivitySelection() }
+        .onChange(of: pickerPresented) { presented in
+            guard !presented else { return }
+            AppGroupStore.setSelection(selection, for: group.id)
+            Task {
+                try? await BackendClient.live.reportSelection(
+                    groupId: group.id, hasSelection: EnforcementEngine.hasContent(selection))
+                await sync.syncNow() // re-enforce with the new selection
+            }
+        }
+    }
+}
+
+struct PolicyRow: View {
+    let policy: RemotePolicy
+    private static let dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+
+    var body: some View {
+        switch policy.kind {
+        case "block":
+            Label(policy.until.flatMap { u in
+                ISO.date(u).map { "Blocked until \($0.formatted(date: .omitted, time: .shortened))" }
+            } ?? "Blocked", systemImage: "hand.raised.fill")
+        case "schedule":
+            let days = (policy.daysOfWeek ?? []).map { Self.dayNames[$0] }.joined(separator: " ")
+            Label("\(policy.startTime ?? "?")–\(policy.endTime ?? "?") \(days)", systemImage: "calendar")
+        case "limit":
+            Label("\(policy.minutesPerDay ?? 0) min/day", systemImage: "timer")
+        default:
+            Text(policy.kind)
+        }
+    }
+}

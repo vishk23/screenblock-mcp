@@ -1,0 +1,44 @@
+name: ScreenCP
+options:
+  bundleIdPrefix: com.vishnukchitti
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    DEVELOPMENT_TEAM: R78VP2V5AQ
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.9"
+targets:
+  ScreenCP:
+    type: application
+    platform: iOS
+    sources:
+      - ScreenCP/Sources
+      - ScreenCP/Shared
+    dependencies:
+      - target: ScreenCPMonitor
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        CODE_SIGN_ENTITLEMENTS: ScreenCP/ScreenCP.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+  ScreenCPMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ScreenCPMonitor/Sources
+      - ScreenCP/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.monitor
+        CODE_SIGN_ENTITLEMENTS: ScreenCPMonitor/ScreenCPMonitor.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+    info:
+      path: ScreenCPMonitor/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).MonitorExtension

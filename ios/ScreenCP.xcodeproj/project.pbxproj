@@ -1,0 +1,466 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */; };
+		478657F796AA6E87613E5492 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */; };
+		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
+		6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8C8461D5B9213E346050B4C4 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		A7FFEA15FD70A8E1B9382C52 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
+		AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */; };
+		B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */; };
+		C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
+		CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */; };
+		E5D4301365A5312823E0E919 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
+		F5F533C19502C1CE67C1B8D9 /* BackendClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6945394780099D6AC387EE /* BackendClient.swift */; };
+		FD1BFD127E76091EFF02C083 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BAE1FDB2D0A283A4936903E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 359F9B31ADA8C15722BA4FC4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7A06FC26E8FE4C448D42309F;
+			remoteInfo = ScreenCPMonitor;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7667882506465E7EEE3D0201 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
+		59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorExtension.swift; sourceTree = "<group>"; };
+		5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5F7341B4D1B1435CAFE58912 /* ScreenCP.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScreenCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6E6945394780099D6AC387EE /* BackendClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendClient.swift; sourceTree = "<group>"; };
+		841BBC193A5364DD09CBF2FF /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCPApp.swift; sourceTree = "<group>"; };
+		91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpikeView.swift; sourceTree = "<group>"; };
+		938CBAF68EF8984183420816 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnforcementEngine.swift; sourceTree = "<group>"; };
+		9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		26BDD55FACF8B9386BE903AC = {
+			isa = PBXGroup;
+			children = (
+				60B5BE589DDA57FFF5122FA7 /* Shared */,
+				F2959C3B03A0216EC55E9A4B /* Sources */,
+				30690A32FF9187C31BBBDA53 /* Sources */,
+				4B0E68F28C1B35EAB9CAAC8F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		30690A32FF9187C31BBBDA53 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */,
+			);
+			name = Sources;
+			path = ScreenCPMonitor/Sources;
+			sourceTree = "<group>";
+		};
+		4B0E68F28C1B35EAB9CAAC8F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5F7341B4D1B1435CAFE58912 /* ScreenCP.app */,
+				1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		60B5BE589DDA57FFF5122FA7 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */,
+				975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */,
+				841BBC193A5364DD09CBF2FF /* Models.swift */,
+			);
+			name = Shared;
+			path = ScreenCP/Shared;
+			sourceTree = "<group>";
+		};
+		F2959C3B03A0216EC55E9A4B /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				6E6945394780099D6AC387EE /* BackendClient.swift */,
+				5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */,
+				8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */,
+				938CBAF68EF8984183420816 /* Secrets.swift */,
+				91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */,
+				9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */,
+			);
+			name = Sources;
+			path = ScreenCP/Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		18795D4D75CEE23EA65056C3 /* ScreenCP */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D53704D0FE2645BDC2B242A /* Build configuration list for PBXNativeTarget "ScreenCP" */;
+			buildPhases = (
+				F3BF9CA16C92CF7490201386 /* Sources */,
+				7667882506465E7EEE3D0201 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5B7B43A40E5374C9A33C3D67 /* PBXTargetDependency */,
+			);
+			name = ScreenCP;
+			packageProductDependencies = (
+			);
+			productName = ScreenCP;
+			productReference = 5F7341B4D1B1435CAFE58912 /* ScreenCP.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7A06FC26E8FE4C448D42309F /* ScreenCPMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 74961196FD093AC1B2315CD7 /* Build configuration list for PBXNativeTarget "ScreenCPMonitor" */;
+			buildPhases = (
+				5669F864CC1C4EA83798B627 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScreenCPMonitor;
+			packageProductDependencies = (
+			);
+			productName = ScreenCPMonitor;
+			productReference = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		359F9B31ADA8C15722BA4FC4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					18795D4D75CEE23EA65056C3 = {
+						DevelopmentTeam = R78VP2V5AQ;
+						ProvisioningStyle = Automatic;
+					};
+					7A06FC26E8FE4C448D42309F = {
+						DevelopmentTeam = R78VP2V5AQ;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = F578E0F1DB58A3B74FC76321 /* Build configuration list for PBXProject "ScreenCP" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 26BDD55FACF8B9386BE903AC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4B0E68F28C1B35EAB9CAAC8F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				18795D4D75CEE23EA65056C3 /* ScreenCP */,
+				7A06FC26E8FE4C448D42309F /* ScreenCPMonitor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5669F864CC1C4EA83798B627 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */,
+				E5D4301365A5312823E0E919 /* EnforcementEngine.swift in Sources */,
+				8C8461D5B9213E346050B4C4 /* Models.swift in Sources */,
+				2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3BF9CA16C92CF7490201386 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A7FFEA15FD70A8E1B9382C52 /* AppGroupStore.swift in Sources */,
+				F5F533C19502C1CE67C1B8D9 /* BackendClient.swift in Sources */,
+				CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */,
+				FD1BFD127E76091EFF02C083 /* EnforcementEngine.swift in Sources */,
+				478657F796AA6E87613E5492 /* Models.swift in Sources */,
+				AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */,
+				6A4677A92B524610921F67FC /* Secrets.swift in Sources */,
+				5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */,
+				B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5B7B43A40E5374C9A33C3D67 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7A06FC26E8FE4C448D42309F /* ScreenCPMonitor */;
+			targetProxy = BAE1FDB2D0A283A4936903E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		496292AFF012608DD08F8E6E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ScreenCP/ScreenCP.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8063D95614413D8DB42434A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScreenCPMonitor/ScreenCPMonitor.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenCPMonitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.monitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B14AD753B6656BABD787FC5A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = R78VP2V5AQ;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		B6FA87E10B09D5819BC98A14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = R78VP2V5AQ;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		CA7C3907D6375E3A000B3D8A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScreenCPMonitor/ScreenCPMonitor.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenCPMonitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.monitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F2DBE6A8B8843F9BD93FE156 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ScreenCP/ScreenCP.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3D53704D0FE2645BDC2B242A /* Build configuration list for PBXNativeTarget "ScreenCP" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				496292AFF012608DD08F8E6E /* Debug */,
+				F2DBE6A8B8843F9BD93FE156 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		74961196FD093AC1B2315CD7 /* Build configuration list for PBXNativeTarget "ScreenCPMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8063D95614413D8DB42434A5 /* Debug */,
+				CA7C3907D6375E3A000B3D8A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F578E0F1DB58A3B74FC76321 /* Build configuration list for PBXProject "ScreenCP" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B6FA87E10B09D5819BC98A14 /* Debug */,
+				B14AD753B6656BABD787FC5A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 359F9B31ADA8C15722BA4FC4 /* Project object */;
+}
