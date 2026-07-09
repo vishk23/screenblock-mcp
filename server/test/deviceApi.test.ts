@@ -78,4 +78,42 @@ describe('device API', () => {
       .send({ hasSelection: true }).expect(200);
     expect((await repo.listGroups())[0].hasSelection).toBe(true);
   });
+
+  it('returns 500 (not a hang) when the repo rejects inside an async handler', async () => {
+    const repo = new FakeRepo();
+    const failingRepo = {
+      ...repo,
+      registerDevice: () => Promise.reject(new Error('db exploded')),
+    };
+    const app = express();
+    app.use(express.json());
+    app.use('/device', makeDeviceRouter({ repo: failingRepo as unknown as FakeRepo, config }));
+
+    const res = await request(app).post('/device/register').set(auth).send({ apnsToken: 'tok1' });
+    expect(res.status).toBe(500);
+    expect(res.body).toEqual({ error: 'internal error' });
+  });
+
+  it('rejects invalid request bodies with 400', async () => {
+    const { app, repo } = makeApp();
+    const g = await repo.createGroup('Social');
+
+    await request(app).post('/device/register').set(auth).send({}).expect(400);
+    await request(app).post('/device/ack').set(auth).send({ apnsToken: 't' }).expect(400);
+    await request(app).post('/device/events').set(auth).send({ events: [{}] }).expect(400);
+    await request(app).post('/device/events').set(auth)
+      .send({ events: Array.from({ length: 501 }, () => ({ type: 'x' })) }).expect(400);
+    await request(app).post(`/device/groups/${g.id}/selection`).set(auth).send({}).expect(400);
+  });
+
+  it('rejects a repeated since query param (array) with 400', async () => {
+    const { app } = makeApp();
+    await request(app).get('/device/sync').set(auth).query('since=a&since=b').expect(400);
+  });
+
+  it('rejects a non-uuid group id in the selection route with 400', async () => {
+    const { app } = makeApp();
+    await request(app).post('/device/groups/not-a-uuid/selection').set(auth)
+      .send({ hasSelection: true }).expect(400);
+  });
 });
