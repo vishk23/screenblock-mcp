@@ -1,0 +1,161 @@
+import { describe, it, expect } from 'vitest';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { buildMcpServer } from '../src/mcp.js';
+import { FakeRepo, FakePush } from './fakes.js';
+import type { Config } from '../src/config.js';
+
+const NOW = new Date('2026-07-08T12:00:00Z'); // 05:00 Jul 8 in LA
+
+const config: Config = {
+  port: 0, databaseUrl: '', mcpBearerToken: 'x', deviceBearerToken: 'y',
+  maxGrantMinutes: 60, timezone: 'America/Los_Angeles', apns: null,
+};
+
+async function setup() {
+  const repo = new FakeRepo();
+  const push = new FakePush();
+  const server = buildMcpServer({ repo, push, config, now: () => NOW });
+  const client = new Client({ name: 'test', version: '0.0.0' });
+  const [ct, st] = InMemoryTransport.createLinkedPair();
+  await Promise.all([server.connect(st), client.connect(ct)]);
+  const call = async (name: string, args: Record<string, unknown> = {}) => {
+    const r = await client.callTool({ name, arguments: args });
+    const text = (r.content as Array<{ type: string; text: string }>)[0].text;
+    return { json: JSON.parse(text), isError: r.isError === true };
+  };
+  return { repo, push, call };
+}
+
+describe('MCP tools', () => {
+  it('lists all 11 tools', async () => {
+    const { repo, push } = { repo: new FakeRepo(), push: new FakePush() };
+    const server = buildMcpServer({ repo, push, config, now: () => NOW });
+    const client = new Client({ name: 't', version: '0' });
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(st), client.connect(ct)]);
+    const { tools } = await client.listTools();
+    expect(tools.map((t) => t.name).sort()).toEqual([
+      'block_now', 'create_group', 'get_status', 'get_today_summary', 'grant_temp_access',
+      'list_groups', 'remove_policy', 'set_goal', 'set_limit', 'set_schedule', 'unblock',
+    ]);
+  });
+
+  it('create_group returns setup instruction; duplicate is an error', async () => {
+    const { call } = await setup();
+    const r = await call('create_group', { name: 'Social' });
+    expect(r.json.group.name).toBe('Social');
+    expect(r.json.note).toMatch(/open the ScreenCP iOS app/);
+    const dup = await call('create_group', { name: 'Social' });
+    expect(dup.isError).toBe(true);
+  });
+
+  it('unknown group name errors and lists existing groups', async () => {
+    const { call } = await setup();
+    await call('create_group', { name: 'Social' });
+    const r = await call('set_limit', { group: 'Games', minutes_per_day: 30 });
+    expect(r.isError).toBe(true);
+    expect(r.json.error).toMatch(/No group matches "Games"/);
+    expect(r.json.error).toMatch(/Social/);
+  });
+
+  it('set_limit creates a policy, fires push, reports no_device_registered', async () => {
+    const { repo, push, call } = await setup();
+    await call('create_group', { name: 'Social' });
+    const r = await call('set_limit', { group: 'social', minutes_per_day: 30 });
+    expect(r.json.policy.kind).toBe('limit');
+    expect(r.json.policy.minutesPerDay).toBe(30);
+    expect(r.json.delivery).toBe('no_device_registered');
+    expect(r.json.setup_required).toMatch(/no apps selected/); // group unpopulated
+    expect(push.calls).toHaveLength(1);
+    expect((await repo.listPolicies(true))).toHaveLength(1);
+  });
+
+  it('delivery is pending with an unacked device, applied after ack', async () => {
+    const { repo, call } = await setup();
+    await call('create_group', { name: 'Social' });
+    await repo.registerDevice('tok1');
+    const r = await call('set_limit', { group: 'Social', minutes_per_day: 30 });
+    expect(r.json.delivery).toBe('pending');
+    await repo.ackDevice('tok1', new Date(Date.now() + 60_000));
+    const s = await call('get_status');
+    expect(s.json.policies[0].delivery).toBe('applied');
+  });
+
+  it('set_schedule maps day names to numbers', async () => {
+    const { repo, call } = await setup();
+    await call('create_group', { name: 'Work Distractions' });
+    const r = await call('set_schedule', {
+      group: 'work', days: ['mon', 'tue', 'wed', 'thu', 'fri'], start: '09:00', end: '17:00',
+    });
+    expect(r.json.policy.daysOfWeek).toEqual([1, 2, 3, 4, 5]);
+    expect(r.json.policy.timezone).toBe('America/Los_Angeles');
+    expect((await repo.listPolicies(true))[0].startTime).toBe('09:00');
+  });
+
+  it('grant_temp_access clamps to the server max and notes it', async () => {
+    const { call } = await setup();
+    await call('create_group', { name: 'Social' });
+    const r = await call('grant_temp_access', { group: 'Social', minutes: 480, reason: 'marathon' });
+    expect(r.json.grant.minutes).toBe(60);
+    expect(r.json.note).toMatch(/capped at 60/);
+    expect(r.json.grant.expiresAt).toBe('2026-07-08T13:00:00.000Z');
+  });
+
+  it('block_now + unblock lifecycle', async () => {
+    const { repo, call } = await setup();
+    await call('create_group', { name: 'Social' });
+    await call('block_now', { group: 'Social' });
+    expect((await repo.listPolicies(true)).filter(p => p.kind === 'block')).toHaveLength(1);
+    const r = await call('unblock', { group: 'Social' });
+    expect(r.json.removed_blocks).toBe(1);
+    expect((await repo.listPolicies(true)).filter(p => p.kind === 'block')).toHaveLength(0);
+  });
+
+  it('unblock warns about other active policies still standing', async () => {
+    const { call } = await setup();
+    await call('create_group', { name: 'Social' });
+    await call('set_limit', { group: 'Social', minutes_per_day: 30 });
+    await call('block_now', { group: 'Social' });
+    const r = await call('unblock', { group: 'Social' });
+    expect(r.json.still_active).toEqual([{ kind: 'limit', minutesPerDay: 30 }]);
+  });
+
+  it('remove_policy deactivates by kind', async () => {
+    const { repo, call } = await setup();
+    await call('create_group', { name: 'Social' });
+    await call('set_limit', { group: 'Social', minutes_per_day: 30 });
+    const r = await call('remove_policy', { group: 'Social', kind: 'limit' });
+    expect(r.json.removed).toBe(1);
+    expect(await repo.listPolicies(true)).toHaveLength(0);
+  });
+
+  it('set_goal + get_today_summary aggregate the day', async () => {
+    const { repo, call } = await setup();
+    const { json: created } = await call('create_group', { name: 'Social' });
+    await call('set_goal', { text: '3 focus hours' });
+    await repo.insertEvents([
+      { type: 'shield_shown', groupId: created.group.id, ts: '2026-07-08T11:00:00Z' },
+      { type: 'threshold_crossed', groupId: created.group.id, ts: '2026-07-08T11:30:00Z', meta: { thresholdMinutes: 30 } },
+    ]);
+    await call('grant_temp_access', { group: 'Social', minutes: 15, reason: 'bus' });
+    const r = await call('get_today_summary');
+    expect(r.json.date).toBe('2026-07-08');
+    expect(r.json.goal.text).toBe('3 focus hours');
+    expect(r.json.shieldShown).toEqual({ Social: 1 });
+    expect(r.json.thresholdsCrossed[0].thresholdMinutes).toBe(30);
+    expect(r.json.grantsUsed).toEqual([{ group: 'Social', minutes: 15, reason: 'bus' }]);
+  });
+
+  it('get_status expires overdue grants and shows remaining minutes on live ones', async () => {
+    const { repo, call } = await setup();
+    const { json: created } = await call('create_group', { name: 'Social' });
+    await repo.createGrant(created.group.id, 15, null, new Date('2026-07-08T11:59:00Z')); // overdue at NOW
+    await repo.createGrant(created.group.id, 15, 'bus', new Date('2026-07-08T12:10:00Z'));
+    const r = await call('get_status');
+    expect(r.json.grants).toHaveLength(1);
+    expect(r.json.grants[0].remainingMinutes).toBe(10);
+    const all = await repo.listGrants();
+    expect(all.find((x) => x.expiresAt === '2026-07-08T11:59:00.000Z')?.status).toBe('expired');
+  });
+});
