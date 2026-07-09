@@ -41,11 +41,28 @@ describe('MCP tools', () => {
     ]);
   });
 
-  it('create_group returns setup instruction; duplicate is an error', async () => {
-    const { call } = await setup();
+  it('annotates read-only and destructive tools correctly', async () => {
+    const { repo, push } = { repo: new FakeRepo(), push: new FakePush() };
+    const server = buildMcpServer({ repo, push, config, now: () => NOW });
+    const client = new Client({ name: 't', version: '0' });
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(st), client.connect(ct)]);
+    const { tools } = await client.listTools();
+    const byName = Object.fromEntries(tools.map((t) => [t.name, t]));
+    expect(byName.get_status.annotations?.readOnlyHint).toBe(true);
+    expect(byName.list_groups.annotations?.readOnlyHint).toBe(true);
+    expect(byName.get_today_summary.annotations?.readOnlyHint).toBe(true);
+    expect(byName.unblock.annotations?.destructiveHint).toBe(true);
+    expect(byName.remove_policy.annotations?.destructiveHint).toBe(true);
+  });
+
+  it('create_group returns setup instruction, fires push + delivery; duplicate is an error', async () => {
+    const { push, call } = await setup();
     const r = await call('create_group', { name: 'Social' });
     expect(r.json.group.name).toBe('Social');
     expect(r.json.note).toMatch(/open the ScreenCP iOS app/);
+    expect(r.json.delivery).toBe('no_device_registered');
+    expect(push.calls).toHaveLength(1);
     const dup = await call('create_group', { name: 'Social' });
     expect(dup.isError).toBe(true);
   });
@@ -67,7 +84,7 @@ describe('MCP tools', () => {
     expect(r.json.policy.minutesPerDay).toBe(30);
     expect(r.json.delivery).toBe('no_device_registered');
     expect(r.json.setup_required).toMatch(/no apps selected/); // group unpopulated
-    expect(push.calls).toHaveLength(1);
+    expect(push.calls).toHaveLength(2); // create_group + set_limit each push
     expect((await repo.listPolicies(true))).toHaveLength(1);
   });
 
@@ -116,9 +133,19 @@ describe('MCP tools', () => {
     const { call } = await setup();
     await call('create_group', { name: 'Social' });
     await call('set_limit', { group: 'Social', minutes_per_day: 30 });
+    await call('set_schedule', {
+      group: 'Social', days: ['mon', 'tue', 'wed', 'thu', 'fri'], start: '09:00', end: '17:00',
+    });
     await call('block_now', { group: 'Social' });
     const r = await call('unblock', { group: 'Social' });
-    expect(r.json.still_active).toEqual([{ kind: 'limit', minutesPerDay: 30 }]);
+    expect(r.json.still_active).toEqual(expect.arrayContaining([
+      { kind: 'limit', minutesPerDay: 30 },
+      {
+        kind: 'schedule', daysOfWeek: [1, 2, 3, 4, 5], startTime: '09:00', endTime: '17:00',
+        timezone: 'America/Los_Angeles',
+      },
+    ]));
+    expect(r.json.still_active).toHaveLength(2);
   });
 
   it('remove_policy deactivates by kind', async () => {
@@ -128,6 +155,22 @@ describe('MCP tools', () => {
     const r = await call('remove_policy', { group: 'Social', kind: 'limit' });
     expect(r.json.removed).toBe(1);
     expect(await repo.listPolicies(true)).toHaveLength(0);
+  });
+
+  it('remove_policy errors when the group has no active policy of that kind', async () => {
+    const { call } = await setup();
+    await call('create_group', { name: 'Social' });
+    const r = await call('remove_policy', { group: 'Social', kind: 'schedule' });
+    expect(r.isError).toBe(true);
+    expect(r.json.error).toMatch(/no active (schedule|limit|block) policy/i);
+  });
+
+  it('set_goal does not fire push or report delivery (not device-synced state)', async () => {
+    const { push, call } = await setup();
+    const before = push.calls.length;
+    const r = await call('set_goal', { text: '3 focus hours' });
+    expect(r.json).not.toHaveProperty('delivery');
+    expect(push.calls).toHaveLength(before);
   });
 
   it('set_goal + get_today_summary aggregate the day', async () => {

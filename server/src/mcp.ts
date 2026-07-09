@@ -117,15 +117,18 @@ export function buildMcpServer(deps: Deps): McpServer {
       'Creates a new empty named group (e.g. "Doomscroll"). The user must then open the ScreenCP iOS app to pick which apps belong to it — that step cannot be done from chat (Apple privacy rule). Tell the user to do this.',
     inputSchema: { name: z.string().min(1).max(60) },
   }, async ({ name }) => {
-    try {
-      const group = await repo.createGroup(name.trim());
-      return ok({
-        group: { id: group.id, name: group.name },
-        note: 'Group created. Now open the ScreenCP iOS app and select which apps belong to this group — enforcement starts once apps are selected.',
-      });
-    } catch {
+    const trimmed = name.trim();
+    const existing = await repo.listGroups();
+    if (existing.some((g) => g.name.toLowerCase() === trimmed.toLowerCase())) {
       return fail(`A group named "${name}" already exists.`);
     }
+    const group = await repo.createGroup(trimmed);
+    const delivery = await afterMutation(`New group ${group.name}`, group.updatedAt);
+    return ok({
+      group: { id: group.id, name: group.name },
+      note: 'Group created. Now open the ScreenCP iOS app and select which apps belong to this group — enforcement starts once apps are selected.',
+      delivery,
+    });
   });
 
   server.registerTool('set_schedule', {
@@ -193,8 +196,8 @@ export function buildMcpServer(deps: Deps): McpServer {
       group: found.group.name,
       removed_blocks: removed,
       still_active: remaining.map((p) => {
-        const v = policyView(p);
-        return { kind: v.kind, ...(v.minutesPerDay != null ? { minutesPerDay: v.minutesPerDay } : {}), ...(v.startTime ? { startTime: v.startTime, endTime: v.endTime } : {}) };
+        const { id: _id, ...view } = policyView(p);
+        return view;
       }),
       delivery,
     });
@@ -248,6 +251,8 @@ export function buildMcpServer(deps: Deps): McpServer {
   }, async ({ text: goalText, target }) => {
     const date = todayInTz(config.timezone, now());
     const goal = await repo.upsertGoal(date, goalText, target ?? null);
+    // No push/delivery here: goals are not device-synced state (changesSince
+    // excludes goals) — they exist only for AI coaching via get_today_summary.
     return ok({ goal });
   });
 
