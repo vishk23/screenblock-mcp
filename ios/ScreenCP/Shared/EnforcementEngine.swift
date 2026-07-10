@@ -86,15 +86,24 @@ enum EnforcementEngine {
     }
 
     /// True if `now` falls inside any active schedule policy window for the group (device-local time).
+    /// Handles overnight windows (start > end, e.g. 22:00–02:00): the post-midnight
+    /// portion belongs to the day AFTER the schedule's start day.
     static func scheduleWindowActive(groupId: String, policies: [RemotePolicy], now: Date = Date()) -> Bool {
         let cal = Calendar.current
-        let weekday0 = cal.component(.weekday, from: now) - 1 // Calendar: 1=Sun → server: 0=Sun
+        let today = cal.component(.weekday, from: now) - 1     // Calendar: 1=Sun → server: 0=Sun
+        let yesterday = (today + 6) % 7
         let minutes = cal.component(.hour, from: now) * 60 + cal.component(.minute, from: now)
         return policies.contains { p in
             guard p.groupId == groupId, p.active, p.kind == "schedule",
-                  let days = p.daysOfWeek, days.contains(weekday0),
+                  let days = p.daysOfWeek,
                   let s = hhmm(p.startTime), let e = hhmm(p.endTime) else { return false }
-            return minutes >= s && minutes < e
+            if s < e {
+                return days.contains(today) && minutes >= s && minutes < e
+            }
+            // Overnight (or s == e meaning all-day): active if we're past start on a
+            // start day, or before end on the day following a start day.
+            return (days.contains(today) && minutes >= s)
+                || (days.contains(yesterday) && minutes < e)
         }
     }
 
