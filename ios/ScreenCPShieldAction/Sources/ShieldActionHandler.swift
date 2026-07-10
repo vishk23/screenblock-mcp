@@ -40,12 +40,12 @@ final class ShieldActionHandler: ShieldActionDelegate {
         switch action {
         case .secondaryButtonPressed:
             AppGroupStore.appendEvent(DeviceEvent(type: "shield_action_tapped", groupId: groupId))
-            if let groupId, EnforcementEngine.unlockFromShield(groupId: groupId) {
-                // Shield lifted — let the app the user tapped come through.
-                completionHandler(.none)
-            } else {
-                completionHandler(.close)
+            if let groupId {
+                _ = EnforcementEngine.unlockFromShield(groupId: groupId)
             }
+            // Close; the next shield render self-heals (lifts shields for the
+            // recorded grant) so reopening the app walks straight through.
+            completionHandler(.close)
         default:
             completionHandler(.close)
         }

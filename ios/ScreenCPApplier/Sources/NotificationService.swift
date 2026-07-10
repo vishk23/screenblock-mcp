@@ -53,6 +53,34 @@ final class NotificationService: UNNotificationServiceExtension {
                 groupId: group.id, policies: AppGroupStore.policies, grants: AppGroupStore.grants)
         }
 
+        // Upload any evidence stranded by the network-less shield extensions.
+        let events = AppGroupStore.drainEvents()
+        if !events.isEmpty {
+            var evReq = URLRequest(url: URL(string: "\(Secrets.baseURL)/device/events")!)
+            evReq.httpMethod = "POST"
+            evReq.setValue("Bearer \(Secrets.deviceBearerToken)", forHTTPHeaderField: "Authorization")
+            evReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            evReq.httpBody = try? JSONEncoder().encode(["events": events])
+            if (try? await URLSession.shared.data(for: evReq)) == nil {
+                AppGroupStore.requeueEvents(events)
+            }
+        }
+        // Upload shield-created grants awaiting the server.
+        for grant in AppGroupStore.pendingLocalGrants {
+            var gReq = URLRequest(url: URL(string: "\(Secrets.baseURL)/device/grants")!)
+            gReq.httpMethod = "POST"
+            gReq.setValue("Bearer \(Secrets.deviceBearerToken)", forHTTPHeaderField: "Authorization")
+            gReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            gReq.httpBody = try? JSONSerialization.data(withJSONObject: [
+                "groupId": grant.groupId, "reason": grant.reason ?? "Unlocked at the shield",
+                "minutes": grant.minutes, "id": grant.id, "startsAt": grant.startsAt,
+            ])
+            if let (_, resp) = try? await URLSession.shared.data(for: gReq),
+               let code = (resp as? HTTPURLResponse)?.statusCode, code == 200 || code == 403 {
+                AppGroupStore.pendingLocalGrants.removeAll { $0.id == grant.id }
+            }
+        }
+
         // Ack so the server's fallback logic knows we applied.
         var ackReq = URLRequest(url: URL(string: "\(Secrets.baseURL)/device/ack")!)
         ackReq.httpMethod = "POST"

@@ -28,6 +28,14 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
     }
 
     private func branded(groupId: String?) -> ShieldConfiguration {
+        // Self-healing render: the action extension records grants but its
+        // enforcement writes don't reliably apply; this extension provably
+        // runs on every shield render, so it applies them instead.
+        let grants = AppGroupStore.grants + AppGroupStore.pendingLocalGrants
+        if let gid = groupId, EnforcementEngine.activeGrant(for: gid, in: grants) != nil {
+            AppGroupStore.appendEvent(DeviceEvent(type: "shield_self_heal", groupId: gid))
+            EnforcementEngine.applyAllImmediateShields(policies: AppGroupStore.policies, grants: grants)
+        }
         let group = AppGroupStore.groups.first { $0.id == groupId }
         let used = groupId.map {
             EnforcementEngine.quotaUsedToday(
