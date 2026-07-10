@@ -7,7 +7,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         // Alert permission is for the visible "Tap to apply" fallback (spec §7 rung 3).
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        // During first-run onboarding the ask is deferred to the flow's final step,
+        // so the dialog doesn't stomp on the welcome screen.
+        if AppGroupStore.suite.bool(forKey: "onboarded") {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        }
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
         return true

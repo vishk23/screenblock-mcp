@@ -1,5 +1,6 @@
 import SwiftUI
 import FamilyControls
+import UserNotifications
 
 /// First-run guided setup: permission → groups → apps → modes → connect coach.
 struct OnboardingView: View {
@@ -127,6 +128,9 @@ struct OnboardingView: View {
                  "In ChatGPT: Settings → Apps & Connectors → enable Developer mode → Create, and paste your ScreenCP connector URL (you have it from setup). Then just talk:\n\n“Block Social till 5.”\n“Give me 15 minutes of Games.”\n“How did I do today?”") {
             Button("Done — start blocking") {
                 AppGroupStore.suite.set(true, forKey: "onboarded")
+                // Deferred from launch: notifications power the "tap to apply"
+                // and "request time" flows, so ask now that there's context.
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
                 onDone()
             }
             .buttonStyle(.borderedProminent)
