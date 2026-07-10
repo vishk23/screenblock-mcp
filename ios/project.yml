@@ -70,7 +70,9 @@ targets:
         CFBundleVersion: "1"
         CFBundleShortVersionString: "0.1.0"
         NSExtension:
-          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-action-service
+          # NOT ManagedSettingsUI — the action service lives under ManagedSettings
+          # (verified against Xcode's own Shield Action Extension template).
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldActionHandler
   ScreenCPShield:
     type: app-extension
