@@ -40,12 +40,14 @@ final class ShieldActionHandler: ShieldActionDelegate {
         switch action {
         case .secondaryButtonPressed:
             AppGroupStore.appendEvent(DeviceEvent(type: "shield_action_tapped", groupId: groupId))
-            if let groupId {
-                _ = EnforcementEngine.unlockFromShield(groupId: groupId)
+            if let groupId, EnforcementEngine.unlockFromShield(groupId: groupId) {
+                // Store writes from this extension take effect (iOS 16+, incl.
+                // named stores — Apple forums 707144). .defer redraws the shield;
+                // with the app no longer shielded it falls away: one-tap unlock.
+                completionHandler(.defer)
+            } else {
+                completionHandler(.close)
             }
-            // Close; the next shield render self-heals (lifts shields for the
-            // recorded grant) so reopening the app walks straight through.
-            completionHandler(.close)
         default:
             completionHandler(.close)
         }
