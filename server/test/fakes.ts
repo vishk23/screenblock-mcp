@@ -77,10 +77,14 @@ export class FakeRepo implements Repo {
     return this.grants.filter((g) => !statuses || statuses.includes(g.status));
   }
 
-  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source: GrantSource = 'chat'): Promise<Grant> {
+  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source: GrantSource = 'chat', id?: string, startsAt?: Date): Promise<Grant> {
+    if (id) {
+      const existing = this.grants.find((g) => g.id === id);
+      if (existing) return existing;
+    }
     const grant: Grant = {
-      id: randomUUID(), groupId, minutes, reason,
-      startsAt: iso(this.nowFn()), expiresAt: iso(expiresAt),
+      id: id ?? randomUUID(), groupId, minutes, reason,
+      startsAt: iso(startsAt ?? this.nowFn()), expiresAt: iso(expiresAt),
       status: 'pending', source, updatedAt: iso(this.nowFn()),
     };
     this.grants.push(grant);

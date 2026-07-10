@@ -1,11 +1,11 @@
 import ManagedSettings
-import UserNotifications
 import Foundation
-import os
 
-/// Handles taps on the shield's buttons. The shield cannot open apps (iOS rule),
-/// so "Request time" posts a Time-Sensitive local notification whose tap opens
-/// ScreenCP straight into the unlock sheet (pendingUnlockGroupId routing).
+/// Handles taps on the shield's buttons. The secondary button is a DIRECT
+/// unlock: this extension holds the same enforcement powers as the app, so
+/// for quota/open groups it lifts the shield on the spot (one ration spent,
+/// logged for coaching) and lets the blocked app open. Strict groups never
+/// show the button. No notifications, no app-hopping.
 final class ShieldActionHandler: ShieldActionDelegate {
 
     override func handle(
@@ -39,42 +39,12 @@ final class ShieldActionHandler: ShieldActionDelegate {
     ) {
         switch action {
         case .secondaryButtonPressed:
-            AppGroupStore.suite.set(groupId ?? "", forKey: "pendingUnlockGroupId")
             AppGroupStore.appendEvent(DeviceEvent(type: "shield_action_tapped", groupId: groupId))
-
-            // Local notifications from this extension are silently dropped on
-            // some iOS versions — ask the server to send a real push instead
-            // (plain visible, no mutable-content, so the NSE leaves it alone).
-            let groupName = AppGroupStore.groups.first { $0.id == groupId }?.name
-            var req = URLRequest(url: URL(string: "\(Secrets.baseURL)/device/nudge")!)
-            req.httpMethod = "POST"
-            req.setValue("Bearer \(Secrets.deviceBearerToken)", forHTTPHeaderField: "Authorization")
-            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            req.httpBody = try? JSONSerialization.data(withJSONObject: [
-                "body": "Tap to request time\(groupName.map { " for \($0)" } ?? "")",
-            ])
-            let finished = OSAllocatedUnfairLock(initialState: false)
-            let finishOnce: () -> Void = {
-                let first = finished.withLock { done -> Bool in
-                    if done { return false }
-                    done = true
-                    return true
-                }
-                if first { completionHandler(.close) }
-            }
-            let task = URLSession.shared.dataTask(with: req) { _, _, _ in finishOnce() }
-            task.resume()
-            // Belt + suspenders: also attempt the local notification, and never
-            // hang past 3s if the network stalls.
-            let content = UNMutableNotificationContent()
-            content.title = "ScreenCP"
-            content.body = "Tap to request time"
-            content.interruptionLevel = .timeSensitive
-            UNUserNotificationCenter.current().add(
-                UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
-            DispatchQueue.global().asyncAfter(deadline: .now() + 3) {
-                task.cancel()
-                finishOnce()
+            if let groupId, EnforcementEngine.unlockFromShield(groupId: groupId) {
+                // Shield lifted — let the app the user tapped come through.
+                completionHandler(.none)
+            } else {
+                completionHandler(.close)
             }
         default:
             completionHandler(.close)

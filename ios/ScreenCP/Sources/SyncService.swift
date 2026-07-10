@@ -9,11 +9,22 @@ enum SyncService {
         do {
             try await client.register(apnsToken: AppGroupStore.deviceToken)
 
+            // Shield-created grants first, so the pull below reflects them.
+            var stillPending: [RemoteGrant] = []
+            for grant in AppGroupStore.pendingLocalGrants {
+                do { try await client.postDeviceGrant(grant) }
+                catch { stillPending.append(grant) }
+            }
+            AppGroupStore.pendingLocalGrants = stillPending
+
             let payload = try await client.sync(since: nil)
 
             AppGroupStore.groups = payload.groups
             AppGroupStore.policies = payload.policies.filter(\.active)
-            AppGroupStore.grants = payload.grants
+            // Merge any still-unuploaded shield grants so enforcement honors them.
+            var grants = payload.grants
+            grants.append(contentsOf: stillPending.filter { p in !grants.contains { $0.id == p.id } })
+            AppGroupStore.grants = grants
 
             EnforcementEngine.reconcileAll()
 

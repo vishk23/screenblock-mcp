@@ -84,6 +84,26 @@ struct BackendClient {
         return try JSONDecoder().decode(UnlockResponse.self, from: data)
     }
 
+    /// Uploads a grant the shield-action extension already applied locally.
+    /// 200 or 403 both mean "server has decided" — only network errors should retry.
+    func postDeviceGrant(_ grant: RemoteGrant) async throws {
+        var req = URLRequest(url: baseURL.appendingPathComponent("device/grants"))
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(deviceToken)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        struct Body: Encodable {
+            let groupId: String; let reason: String; let minutes: Int
+            let id: String; let startsAt: String
+        }
+        req.httpBody = try JSONEncoder().encode(Body(
+            groupId: grant.groupId, reason: grant.reason ?? "Unlocked at the shield",
+            minutes: grant.minutes, id: grant.id, startsAt: grant.startsAt))
+        let (_, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 || http.statusCode == 403 else {
+            throw URLError(.badServerResponse)
+        }
+    }
+
     func createGroup(name: String) async throws {
         struct Body: Encodable { let name: String }
         _ = try await request("device/groups", body: Body(name: name))

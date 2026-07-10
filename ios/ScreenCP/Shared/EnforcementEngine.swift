@@ -181,6 +181,51 @@ enum EnforcementEngine {
         }
     }
 
+    /// Today's used self-serve unlocks for a group (device-local day).
+    static func quotaUsedToday(groupId: String, grants: [RemoteGrant], now: Date = Date()) -> Int {
+        let dayStart = Calendar.current.startOfDay(for: now)
+        return grants.filter {
+            $0.groupId == groupId && $0.source == "device_quota" && $0.status != "cancelled"
+                && (ISO.date($0.startsAt).map { $0 >= dayStart } ?? false)
+        }.count
+    }
+
+    /// Direct unlock from the shield (quota/open modes). Creates the grant locally,
+    /// queues it for server upload, lifts shields, and best-effort schedules re-block.
+    /// Returns false when the mode/quota forbids it.
+    @discardableResult
+    static func unlockFromShield(groupId: String, now: Date = Date()) -> Bool {
+        guard let group = AppGroupStore.groups.first(where: { $0.id == groupId }) else { return false }
+        let all = AppGroupStore.grants + AppGroupStore.pendingLocalGrants
+        switch group.mode {
+        case "quota":
+            guard quotaUsedToday(groupId: groupId, grants: all, now: now) < group.quotaPerDay else { return false }
+        case "open":
+            break
+        default:
+            return false // strict: chat is the only door
+        }
+        let iso = ISO8601DateFormatter()
+        let expires = now.addingTimeInterval(TimeInterval(group.quotaMinutes * 60))
+        let grant = RemoteGrant(
+            id: UUID().uuidString.lowercased(), groupId: groupId, minutes: group.quotaMinutes,
+            reason: "Unlocked at the shield", startsAt: iso.string(from: now),
+            expiresAt: iso.string(from: expires), status: "active", source: "device_quota",
+            updatedAt: iso.string(from: now))
+        AppGroupStore.grants = AppGroupStore.grants + [grant]
+        AppGroupStore.pendingLocalGrants = AppGroupStore.pendingLocalGrants + [grant]
+        applyAllImmediateShields(policies: AppGroupStore.policies, grants: AppGroupStore.grants, now: now)
+        // Best-effort re-block timer; the app/NSE/monitor reconcile is the backstop.
+        let cal = Calendar.current
+        let schedule = DeviceActivitySchedule(
+            intervalStart: cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now),
+            intervalEnd: cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: expires),
+            repeats: false)
+        try? DeviceActivityCenter().startMonitoring(.init("grantend_\(groupId)"), during: schedule)
+        AppGroupStore.appendEvent(DeviceEvent(type: "grant_started", groupId: groupId, meta: ["minutes": group.quotaMinutes]))
+        return true
+    }
+
     static func hasContent(_ s: FamilyActivitySelection) -> Bool {
         !s.applicationTokens.isEmpty || !s.categoryTokens.isEmpty
     }

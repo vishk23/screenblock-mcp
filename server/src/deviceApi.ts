@@ -35,6 +35,10 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
       groupId: z.string().uuid(),
       reason: z.string().trim().min(1).max(200),
       minutes: z.number().int().min(1).optional(),
+      // Shield-created grants upload after the fact: client id (idempotent
+      // retries) + the actual unlock time, so expiry matches the device.
+      id: z.string().uuid().optional(),
+      startsAt: z.string().datetime({ offset: true }).or(z.string().datetime()).optional(),
     }).safeParse(req.body);
     if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
 
@@ -70,9 +74,11 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
       minutes = Math.min(body.data.minutes ?? group.quotaMinutes, config.maxGrantMinutes);
     }
 
+    const startsAt = body.data.startsAt ? new Date(body.data.startsAt) : new Date();
     const grant = await repo.createGrant(
       group.id, minutes, body.data.reason,
-      new Date(Date.now() + minutes * 60_000), 'device_quota',
+      new Date(startsAt.getTime() + minutes * 60_000), 'device_quota',
+      body.data.id, startsAt,
     );
     res.json({ grant, remaining_today: remainingToday });
   }));

@@ -20,7 +20,7 @@ export interface Repo {
   deactivatePolicies(groupId: string, kind?: PolicyKind): Promise<number>;
 
   listGrants(statuses?: Grant['status'][]): Promise<Grant[]>;
-  createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source?: GrantSource): Promise<Grant>;
+  createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source?: GrantSource, id?: string, startsAt?: Date): Promise<Grant>;
   /** Marks pending/active grants with expires_at <= now as expired. Returns count. */
   expireGrants(now: Date): Promise<number>;
   /** Cancels pending/active grants for a group (a later block overrides an earlier grant). */
@@ -155,10 +155,14 @@ export class PgRepo implements Repo {
     return rows.map(rowToGrant);
   }
 
-  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source: GrantSource = 'chat') {
+  async createGrant(groupId: string, minutes: number, reason: string | null, expiresAt: Date, source: GrantSource = 'chat', id?: string, startsAt?: Date) {
+    // Client-supplied id makes shield-created grant uploads idempotent (safe retries).
     const { rows } = await this.pool.query(
-      'insert into grants (group_id, minutes, reason, expires_at, source) values ($1, $2, $3, $4, $5) returning *',
-      [groupId, minutes, reason, expiresAt, source],
+      `insert into grants (id, group_id, minutes, reason, starts_at, expires_at, source)
+       values (coalesce($6::uuid, gen_random_uuid()), $1, $2, $3, coalesce($7::timestamptz, now()), $4, $5)
+       on conflict (id) do update set updated_at = grants.updated_at
+       returning *`,
+      [groupId, minutes, reason, expiresAt, source, id ?? null, startsAt ?? null],
     );
     return rowToGrant(rows[0]);
   }

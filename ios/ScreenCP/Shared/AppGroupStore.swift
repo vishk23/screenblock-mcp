@@ -6,6 +6,10 @@ import FamilyControls
 enum AppGroupStore {
     static let suite = UserDefaults(suiteName: "group.com.vishnukchitti.screencp")!
 
+    /// Extensions (shield config/action) live for milliseconds — buffered
+    /// UserDefaults writes die with the process unless forced to disk.
+    static func flush() { suite.synchronize() }
+
     // MARK: group name→apps selections (device is source of truth for these)
 
     static func selection(for groupId: String) -> FamilyActivitySelection? {
@@ -15,6 +19,7 @@ enum AppGroupStore {
 
     static func setSelection(_ selection: FamilyActivitySelection, for groupId: String) {
         suite.set(try? JSONEncoder().encode(selection), forKey: "selection_\(groupId)")
+        flush()
     }
 
     // MARK: synced policy snapshot (extension reads these to act at interval boundaries)
@@ -26,7 +31,13 @@ enum AppGroupStore {
 
     static var grants: [RemoteGrant] {
         get { decode("grants") ?? [] }
-        set { suite.set(try? JSONEncoder().encode(newValue), forKey: "grants") }
+        set { suite.set(try? JSONEncoder().encode(newValue), forKey: "grants"); flush() }
+    }
+
+    /// Grants created BY extensions at the shield, awaiting upload to the server.
+    static var pendingLocalGrants: [RemoteGrant] {
+        get { decode("pendingLocalGrants") ?? [] }
+        set { suite.set(try? JSONEncoder().encode(newValue), forKey: "pendingLocalGrants"); flush() }
     }
 
     static var groups: [RemoteGroup] {
@@ -40,6 +51,7 @@ enum AppGroupStore {
         var queue: [DeviceEvent] = decode("eventQueue") ?? []
         queue.append(event)
         suite.set(try? JSONEncoder().encode(queue), forKey: "eventQueue")
+        flush()
     }
 
     static func drainEvents() -> [DeviceEvent] {

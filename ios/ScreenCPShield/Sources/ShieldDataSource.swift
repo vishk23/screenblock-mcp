@@ -3,42 +3,64 @@ import ManagedSettingsUI
 import UIKit
 
 /// iOS invokes this every time it renders a shield over a blocked app.
-/// We log the hit (coaching signal for get_today_summary) and brand the shield.
+/// We log the hit (coaching signal) and render mode-aware buttons:
+/// quota with rations left → "Unlock N min" (direct, handled by the action ext);
+/// quota exhausted → no unlock button; strict → chat-only message; open → unlock.
 final class ShieldDataSource: ShieldConfigurationDataSource {
 
     override func configuration(shielding application: Application) -> ShieldConfiguration {
-        logHit(groupId: groupId(containing: application.token))
-        return branded()
+        let gid = groupId(containing: application.token)
+        logHit(groupId: gid)
+        return branded(groupId: gid)
     }
 
     override func configuration(
         shielding application: Application, in category: ActivityCategory
     ) -> ShieldConfiguration {
-        logHit(groupId: groupId(containingCategory: category.token))
-        return branded()
+        let gid = groupId(containingCategory: category.token)
+        logHit(groupId: gid)
+        return branded(groupId: gid)
     }
 
     override func configuration(shielding webDomain: WebDomain) -> ShieldConfiguration {
         logHit(groupId: nil)
-        return branded()
+        return branded(groupId: nil)
     }
 
-    private func branded() -> ShieldConfiguration {
-        // After a "Request time" tap, the next render guides the user onward
-        // (the shield itself cannot open apps or post notifications reliably).
-        let pending = !(AppGroupStore.suite.string(forKey: "pendingUnlockGroupId") ?? "").isEmpty
+    private func branded(groupId: String?) -> ShieldConfiguration {
+        let group = AppGroupStore.groups.first { $0.id == groupId }
+        let used = groupId.map {
+            EnforcementEngine.quotaUsedToday(
+                groupId: $0, grants: AppGroupStore.grants + AppGroupStore.pendingLocalGrants)
+        } ?? 0
+
+        var subtitle = "Ask ChatGPT if you need time here."
+        var unlockLabel: String?
+        switch group?.mode {
+        case "quota":
+            let left = max(0, (group?.quotaPerDay ?? 0) - used)
+            if left > 0 {
+                unlockLabel = "Unlock \(group?.quotaMinutes ?? 10) min (\(left) left today)"
+                subtitle = "One tap spends a ration — your coach sees it."
+            } else {
+                subtitle = "All \(group?.quotaPerDay ?? 0) unlocks used today. Ask ChatGPT."
+            }
+        case "open":
+            unlockLabel = "Unlock \(group?.quotaMinutes ?? 10) min"
+        case "strict":
+            subtitle = "Strict mode — your ChatGPT coach is the only door."
+        default:
+            break
+        }
+
         return ShieldConfiguration(
             backgroundBlurStyle: .systemMaterialDark,
-            icon: UIImage(systemName: pending ? "arrow.up.forward.app" : "hourglass"),
+            icon: UIImage(systemName: "hourglass"),
             title: .init(text: "Blocked by ScreenCP", color: .white),
-            subtitle: .init(
-                text: pending
-                    ? "Request started — open ScreenCP to choose your reason and unlock."
-                    : "Ask ChatGPT if you need time here.",
-                color: .lightGray),
+            subtitle: .init(text: subtitle, color: .lightGray),
             primaryButtonLabel: .init(text: "OK", color: .black),
             primaryButtonBackgroundColor: .white,
-            secondaryButtonLabel: .init(text: pending ? "Request pending…" : "Request time", color: .white)
+            secondaryButtonLabel: unlockLabel.map { .init(text: $0, color: .white) }
         )
     }
 
