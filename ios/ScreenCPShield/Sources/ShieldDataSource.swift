@@ -74,15 +74,9 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
         )
     }
 
-    /// Which group's selection contains this app token?
+    /// Most-specific group containing this app token (per-app groups win).
     private func groupId(containing token: ApplicationToken?) -> String? {
-        guard let token else { return nil }
-        for group in AppGroupStore.groups {
-            if AppGroupStore.selection(for: group.id)?.applicationTokens.contains(token) == true {
-                return group.id
-            }
-        }
-        return nil
+        token.flatMap { EnforcementEngine.groupContaining(appToken: $0) }
     }
 
     private func groupId(containingCategory token: ActivityCategoryToken?) -> String? {

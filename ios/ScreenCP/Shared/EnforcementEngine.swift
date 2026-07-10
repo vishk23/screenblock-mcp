@@ -242,6 +242,19 @@ enum EnforcementEngine {
         return true
     }
 
+    /// Most-specific group containing this app token: dedicated per-app groups
+    /// (fewest apps) win attribution over broad ones, so their mode/quota govern.
+    static func groupContaining(appToken: ApplicationToken) -> String? {
+        var best: (id: String, size: Int)?
+        for group in AppGroupStore.groups {
+            guard let sel = AppGroupStore.selection(for: group.id),
+                  sel.applicationTokens.contains(appToken) else { continue }
+            let size = sel.applicationTokens.count
+            if best == nil || size < best!.size { best = (group.id, size) }
+        }
+        return best?.id
+    }
+
     static func hasContent(_ s: FamilyActivitySelection) -> Bool {
         !s.applicationTokens.isEmpty || !s.categoryTokens.isEmpty
     }

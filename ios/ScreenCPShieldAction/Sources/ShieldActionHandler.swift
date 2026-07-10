@@ -13,7 +13,7 @@ final class ShieldActionHandler: ShieldActionDelegate {
         for application: ApplicationToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
-        respond(action, groupId: groupId { $0.applicationTokens.contains(application) },
+        respond(action, groupId: EnforcementEngine.groupContaining(appToken: application),
                 appToken: application, completionHandler)
     }
 
