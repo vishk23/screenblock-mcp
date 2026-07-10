@@ -126,16 +126,25 @@ enum EnforcementEngine {
             guard let selection = AppGroupStore.selection(for: group.id), hasContent(selection) else { continue }
             let groupPolicies = policies.filter { $0.groupId == group.id && $0.active }
 
-            // Recurring block windows — one activity per weekday.
+            // Recurring block windows — one activity per weekday. Overnight windows
+            // (start > end) are split into two well-formed same-day windows, since
+            // DeviceActivitySchedule does not reliably span midnight in one interval.
             for p in groupPolicies where p.kind == "schedule" {
                 guard let s = clock(p.startTime), let e = clock(p.endTime), let days = p.daysOfWeek else { continue }
+                let startM = s.h * 60 + s.m, endM = e.h * 60 + e.m
                 for day in days {
-                    let schedule = DeviceActivitySchedule(
-                        intervalStart: DateComponents(hour: s.h, minute: s.m, weekday: day + 1),
-                        intervalEnd: DateComponents(hour: e.h, minute: e.m, weekday: day + 1),
-                        repeats: true
-                    )
-                    try? center.startMonitoring(.init("schedule_\(group.id)_\(day)"), during: schedule)
+                    if startM < endM {
+                        register(center, "schedule_\(group.id)_\(day)",
+                                 startH: s.h, startMin: s.m, endH: e.h, endMin: e.m, weekday: day + 1)
+                    } else {
+                        // Pre-midnight portion on the start day…
+                        register(center, "schedule_\(group.id)_\(day)_a",
+                                 startH: s.h, startMin: s.m, endH: 23, endMin: 59, weekday: day + 1)
+                        // …post-midnight portion on the following day.
+                        let next = (day + 1) % 7
+                        register(center, "schedule_\(group.id)_\(day)_b",
+                                 startH: 0, startMin: 0, endH: e.h, endMin: e.m, weekday: next + 1)
+                    }
                 }
             }
 
@@ -179,6 +188,16 @@ enum EnforcementEngine {
     private static func clock(_ s: String?) -> (h: Int, m: Int)? {
         guard let total = hhmm(s) else { return nil }
         return (total / 60, total % 60)
+    }
+
+    private static func register(_ center: DeviceActivityCenter, _ name: String,
+                                 startH: Int, startMin: Int, endH: Int, endMin: Int, weekday: Int) {
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: startH, minute: startMin, weekday: weekday),
+            intervalEnd: DateComponents(hour: endH, minute: endMin, weekday: weekday),
+            repeats: true
+        )
+        try? center.startMonitoring(.init(name), during: schedule)
     }
 
     /// Full local reconcile: immediate shields for every group + OS schedule registration.
