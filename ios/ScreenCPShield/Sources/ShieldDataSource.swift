@@ -11,7 +11,7 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
     override func configuration(shielding application: Application) -> ShieldConfiguration {
         let gid = groupId(containing: application.token)
         logHit(groupId: gid)
-        return branded(groupId: gid)
+        return branded(groupId: gid, singleApp: true)
     }
 
     override func configuration(
@@ -27,7 +27,7 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
         return branded(groupId: nil)
     }
 
-    private func branded(groupId: String?) -> ShieldConfiguration {
+    private func branded(groupId: String?, singleApp: Bool = false) -> ShieldConfiguration {
         // Self-healing render: the action extension records grants but its
         // enforcement writes don't reliably apply; this extension provably
         // runs on every shield render, so it applies them instead.
@@ -48,7 +48,9 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
         case "quota":
             let left = max(0, (group?.quotaPerDay ?? 0) - used)
             if left > 0 {
-                unlockLabel = "Unlock \(group?.quotaMinutes ?? 10) min (\(left) left today)"
+                unlockLabel = singleApp
+                    ? "Unlock this app \(group?.quotaMinutes ?? 10) min (\(left) left)"
+                    : "Unlock \(group?.quotaMinutes ?? 10) min (\(left) left today)"
                 subtitle = "One tap spends a ration — your coach sees it."
             } else {
                 subtitle = "All \(group?.quotaPerDay ?? 0) unlocks used today. Ask ChatGPT."

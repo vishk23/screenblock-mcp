@@ -1,5 +1,6 @@
 import Foundation
 import FamilyControls
+import ManagedSettings
 
 /// Shared state between the main app and the monitor extension,
 /// persisted in App Group UserDefaults.
@@ -32,6 +33,13 @@ enum AppGroupStore {
     static var grants: [RemoteGrant] {
         get { decode("grants") ?? [] }
         set { suite.set(try? JSONEncoder().encode(newValue), forKey: "grants"); flush() }
+    }
+
+    /// Single-app unlock exemptions (token -> expiry). Enforcement-side only:
+    /// the coaching grant row is group-scoped, but the shield hole is one app.
+    static var tokenExemptions: [ApplicationToken: Date] {
+        get { decode("tokenExemptions") ?? [:] }
+        set { suite.set(try? JSONEncoder().encode(newValue), forKey: "tokenExemptions"); flush() }
     }
 
     /// Grants created BY extensions at the shield, awaiting upload to the server.

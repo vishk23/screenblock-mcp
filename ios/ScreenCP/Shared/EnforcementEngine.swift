@@ -8,6 +8,10 @@ import DeviceActivity
 /// One named ManagedSettingsStore per group so groups don't clobber each other.
 enum EnforcementEngine {
 
+    /// Grants with this reason are single-app: they must NOT lift the whole
+    /// group's shield (their hole lives in AppGroupStore.tokenExemptions).
+    static let singleAppReason = "Unlocked at the shield (this app only)"
+
     static func storeName(_ groupId: String) -> ManagedSettingsStore.Name {
         .init("group_\(groupId)")
     }
@@ -15,6 +19,7 @@ enum EnforcementEngine {
     static func activeGrant(for groupId: String, in grants: [RemoteGrant], now: Date = Date()) -> RemoteGrant? {
         grants.first { g in
             g.groupId == groupId
+                && g.reason != singleAppReason // single-app holes never open the whole group
                 && (g.status == "pending" || g.status == "active")
                 && (ISO.date(g.expiresAt).map { $0 > now } ?? false)
         }
@@ -29,6 +34,10 @@ enum EnforcementEngine {
             if let sel = AppGroupStore.selection(for: group.id) {
                 exempt.formUnion(sel.applicationTokens)
             }
+        }
+        // Single-app unlock holes.
+        for (token, expiry) in AppGroupStore.tokenExemptions where expiry > now {
+            exempt.insert(token)
         }
         return exempt
     }
@@ -194,7 +203,7 @@ enum EnforcementEngine {
     /// queues it for server upload, lifts shields, and best-effort schedules re-block.
     /// Returns false when the mode/quota forbids it.
     @discardableResult
-    static func unlockFromShield(groupId: String, now: Date = Date()) -> Bool {
+    static func unlockFromShield(groupId: String, appToken: ApplicationToken? = nil, now: Date = Date()) -> Bool {
         guard let group = AppGroupStore.groups.first(where: { $0.id == groupId }) else { return false }
         let all = AppGroupStore.grants + AppGroupStore.pendingLocalGrants
         switch group.mode {
@@ -207,9 +216,16 @@ enum EnforcementEngine {
         }
         let iso = ISO8601DateFormatter()
         let expires = now.addingTimeInterval(TimeInterval(group.quotaMinutes * 60))
+        // Tapped on a specific app? Scope the hole to that app alone.
+        if let appToken {
+            var exemptions = AppGroupStore.tokenExemptions.filter { $0.value > now } // prune
+            exemptions[appToken] = expires
+            AppGroupStore.tokenExemptions = exemptions
+        }
         let grant = RemoteGrant(
             id: UUID().uuidString.lowercased(), groupId: groupId, minutes: group.quotaMinutes,
-            reason: "Unlocked at the shield", startsAt: iso.string(from: now),
+            reason: appToken != nil ? singleAppReason : "Unlocked at the shield",
+            startsAt: iso.string(from: now),
             expiresAt: iso.string(from: expires), status: "active", source: "device_quota",
             updatedAt: iso.string(from: now))
         AppGroupStore.grants = AppGroupStore.grants + [grant]

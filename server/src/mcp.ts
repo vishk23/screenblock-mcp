@@ -74,6 +74,7 @@ export function buildMcpServer(deps: Deps): McpServer {
         '- Grants are capped server-side; for open-ended access use unblock, and confirm before removing protective policies.',
         '- delivery "pending" = the phone has not applied the change yet (it usually applies within ~10s via push); "no_device_registered" = the iOS app has never connected.',
         '- Log grant reasons — they power coaching. When granting, ask for/record a short reason if the user gave none.',
+        '- The user can also unlock at the shield itself (quota/open groups). Those grants reach the server on the device\'s next sync — if get_status shows no grant but the user says they just unlocked, TRUST THE USER; get_status pokes the device to sync, so re-check in a moment. last_device_sync tells you how fresh the picture is.',
         '- Coach with data: get_today_summary and get_summary_range show shield hits (times they bumped into a block), thresholds crossed (coarse usage), and grants used with reasons. Exact per-app minute totals are impossible off-device (Apple policy) — never promise them.',
       ].join('\n'),
     },
@@ -106,7 +107,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     inputSchema: {},
     outputSchema: {
       groups: z.array(z.any()), policies: z.array(z.any()), grants: z.array(z.any()),
-      device_connected: z.boolean(),
+      device_connected: z.boolean(), last_device_sync: z.string().nullable(),
     },
     annotations: { readOnlyHint: true },
   }, async () => {
@@ -116,6 +117,12 @@ export function buildMcpServer(deps: Deps): McpServer {
       repo.listGrants(['pending', 'active']), repo.listDevices(),
     ]);
     const nameOf = (id: string) => groups.find((g) => g.id === id)?.name ?? 'unknown';
+    // Freshness poke: a silent push makes the device sync + upload any
+    // shield-created grants, so the NEXT status read reflects them.
+    if (deps.sender) {
+      void Promise.all(devices.map((d) => deps.sender!.sendSilent(d.apnsToken).catch(() => {})));
+    }
+    const lastSync = devices.map((d) => d.appliedThrough).filter(Boolean).sort().at(-1) ?? null;
     return ok({
       groups: groups.map((g) => ({ name: g.name, hasSelection: g.hasSelection, mode: g.mode })),
       policies: policies.map((p) => ({
@@ -128,6 +135,7 @@ export function buildMcpServer(deps: Deps): McpServer {
         delivery: deliveryState(g.updatedAt, devices),
       })),
       device_connected: devices.length > 0,
+      last_device_sync: lastSync,
     });
   });
 

@@ -13,7 +13,8 @@ final class ShieldActionHandler: ShieldActionDelegate {
         for application: ApplicationToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
-        respond(action, groupId: groupId { $0.applicationTokens.contains(application) }, completionHandler)
+        respond(action, groupId: groupId { $0.applicationTokens.contains(application) },
+                appToken: application, completionHandler)
     }
 
     override func handle(
@@ -21,7 +22,7 @@ final class ShieldActionHandler: ShieldActionDelegate {
         for webDomain: WebDomainToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
-        respond(action, groupId: groupId { $0.webDomainTokens.contains(webDomain) }, completionHandler)
+        respond(action, groupId: groupId { $0.webDomainTokens.contains(webDomain) }, appToken: nil, completionHandler)
     }
 
     override func handle(
@@ -29,18 +30,19 @@ final class ShieldActionHandler: ShieldActionDelegate {
         for category: ActivityCategoryToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
-        respond(action, groupId: groupId { $0.categoryTokens.contains(category) }, completionHandler)
+        respond(action, groupId: groupId { $0.categoryTokens.contains(category) }, appToken: nil, completionHandler)
     }
 
     private func respond(
         _ action: ShieldAction,
         groupId: String?,
+        appToken: ApplicationToken?,
         _ completionHandler: @escaping (ShieldActionResponse) -> Void
     ) {
         switch action {
         case .secondaryButtonPressed:
             AppGroupStore.appendEvent(DeviceEvent(type: "shield_action_tapped", groupId: groupId))
-            if let groupId, EnforcementEngine.unlockFromShield(groupId: groupId) {
+            if let groupId, EnforcementEngine.unlockFromShield(groupId: groupId, appToken: appToken) {
                 // Store writes from this extension take effect (iOS 16+, incl.
                 // named stores — Apple forums 707144). .defer redraws the shield;
                 // with the app no longer shielded it falls away: one-tap unlock.
