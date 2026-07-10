@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import type { Repo } from './repo.js';
-import type { Push } from './push.js';
+import type { Push, PushSender } from './push.js';
 import type { Config } from './config.js';
 import type { Group, Policy } from './types.js';
 import {
@@ -12,6 +12,8 @@ export interface Deps {
   repo: Repo;
   push: Push;
   config: Config;
+  /** Raw sender for device-initiated nudges (shield Request-time flow). */
+  sender?: PushSender;
   now?: () => Date;
 }
 

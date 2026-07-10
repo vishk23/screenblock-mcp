@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { z } from 'zod';
 import type { Repo } from './repo.js';
 import type { Config } from './config.js';
+import type { PushSender } from './push.js';
 import { todayInTz } from './domain.js';
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
@@ -9,7 +10,7 @@ const wrap = (fn: AsyncHandler) => (req: Request, res: Response, next: NextFunct
   fn(req, res).catch(next);
 };
 
-export function makeDeviceRouter(deps: { repo: Repo; config: Config }): Router {
+export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: PushSender }): Router {
   const { repo, config } = deps;
   const router = Router();
 
@@ -84,6 +85,21 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config }): Router {
     const dup = existing.find((g) => g.name.toLowerCase() === body.data.name.toLowerCase());
     if (dup) { res.json({ group: dup, existed: true }); return; }
     res.json({ group: await repo.createGroup(body.data.name), existed: false });
+  }));
+
+  /**
+   * Shield "Request time" flow: the ShieldAction extension can't reliably post
+   * local notifications, so it asks the server to send a real push instead.
+   * Plain visible (no mutable-content) so the NSE doesn't rewrite it.
+   */
+  router.post('/nudge', wrap(async (req, res) => {
+    const body = z.object({ body: z.string().trim().min(1).max(120) }).safeParse(req.body);
+    if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
+    if (!deps.sender) { res.status(503).json({ error: 'push not configured' }); return; }
+    const devices = await repo.listDevices();
+    await Promise.all(devices.map((d) =>
+      deps.sender!.sendNudge(d.apnsToken, 'ScreenCP', body.data.body).catch(() => {})));
+    res.json({ sent: devices.length });
   }));
 
   router.post('/register', wrap(async (req, res) => {

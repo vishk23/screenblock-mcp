@@ -58,6 +58,7 @@ targets:
     sources:
       - ScreenCPShieldAction/Sources
       - ScreenCP/Shared
+      - ScreenCP/Sources/Secrets.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.shieldaction

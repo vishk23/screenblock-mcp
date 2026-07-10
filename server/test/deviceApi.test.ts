@@ -10,10 +10,17 @@ const config: Config = {
   maxGrantMinutes: 60, timezone: 'America/Los_Angeles', apns: null,
 };
 
-function makeApp(repo = new FakeRepo()) {
+class RecordingSender {
+  nudges: Array<{ token: string; body: string }> = [];
+  async sendSilent(_t: string) {}
+  async sendVisible(_t: string, _title: string, _b: string) {}
+  async sendNudge(token: string, _title: string, body: string) { this.nudges.push({ token, body }); }
+}
+
+function makeApp(repo = new FakeRepo(), sender?: RecordingSender) {
   const app = express();
   app.use(express.json());
-  app.use('/device', makeDeviceRouter({ repo, config }));
+  app.use('/device', makeDeviceRouter({ repo, config, sender }));
   return { app, repo };
 }
 
@@ -78,6 +85,20 @@ describe('device unlock endpoint (POST /device/grants)', () => {
     const r2 = await request(app).post('/device/groups').set(auth).send({ name: 'social' }).expect(200);
     expect(r2.body.existed).toBe(true);
     expect(await repo.listGroups()).toHaveLength(1);
+  });
+
+  it('nudge sends a plain visible push to every device; 503 without a sender', async () => {
+    const sender = new RecordingSender();
+    const { app, repo } = makeApp(new FakeRepo(), sender);
+    await repo.registerDevice('tok1');
+    await repo.registerDevice('tok2');
+    const r = await request(app).post('/device/nudge').set(auth)
+      .send({ body: 'Tap to request time' }).expect(200);
+    expect(r.body.sent).toBe(2);
+    expect(sender.nudges.map((n) => n.token).sort()).toEqual(['tok1', 'tok2']);
+    const { app: noSender } = makeApp();
+    await request(noSender).post('/device/nudge').set(auth)
+      .send({ body: 'x' }).expect(503);
   });
 
   it('unknown group 404', async () => {

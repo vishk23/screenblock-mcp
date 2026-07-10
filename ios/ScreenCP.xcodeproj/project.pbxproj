@@ -14,6 +14,7 @@
 		39C95B2EC3490D5C2F7846F6 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F108E947B409386ACE147906 /* SyncService.swift */; };
 		478657F796AA6E87613E5492 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */; };
 		540F4B7363B0D5B5805BCAB6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
@@ -381,6 +382,7 @@
 				E0EBC64CBEA99880165686BB /* AppGroupStore.swift in Sources */,
 				B2990C2DA0DBD43591A768D1 /* EnforcementEngine.swift in Sources */,
 				2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */,
+				4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */,
 				0329E9BD4E86C588B0C94697 /* ShieldActionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

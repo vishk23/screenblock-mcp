@@ -5,8 +5,10 @@ import { FakeRepo } from './fakes.js';
 class RecordingSender implements PushSender {
   silent: string[] = [];
   visible: Array<{ token: string; body: string }> = [];
+  nudges: Array<{ token: string; body: string }> = [];
   async sendSilent(token: string) { this.silent.push(token); }
   async sendVisible(token: string, _title: string, body: string) { this.visible.push({ token, body }); }
+  async sendNudge(token: string, _title: string, body: string) { this.nudges.push({ token, body }); }
 }
 
 describe('Ladder', () => {
@@ -55,6 +57,7 @@ describe('Ladder', () => {
     const failing: PushSender = {
       sendSilent: async () => { throw new Error('apns down'); },
       sendVisible: async () => { throw new Error('apns down'); },
+      sendNudge: async () => { throw new Error('apns down'); },
     };
     const ladder = new Ladder(repo, failing, 1000);
     ladder.policyChanged(new Date(), 'x');

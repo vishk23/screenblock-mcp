@@ -1,6 +1,7 @@
 import ManagedSettings
 import UserNotifications
 import Foundation
+import os
 
 /// Handles taps on the shield's buttons. The shield cannot open apps (iOS rule),
 /// so "Request time" posts a Time-Sensitive local notification whose tap opens
@@ -39,13 +40,41 @@ final class ShieldActionHandler: ShieldActionDelegate {
         switch action {
         case .secondaryButtonPressed:
             AppGroupStore.suite.set(groupId ?? "", forKey: "pendingUnlockGroupId")
+
+            // Local notifications from this extension are silently dropped on
+            // some iOS versions — ask the server to send a real push instead
+            // (plain visible, no mutable-content, so the NSE leaves it alone).
+            let groupName = AppGroupStore.groups.first { $0.id == groupId }?.name
+            var req = URLRequest(url: URL(string: "\(Secrets.baseURL)/device/nudge")!)
+            req.httpMethod = "POST"
+            req.setValue("Bearer \(Secrets.deviceBearerToken)", forHTTPHeaderField: "Authorization")
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = try? JSONSerialization.data(withJSONObject: [
+                "body": "Tap to request time\(groupName.map { " for \($0)" } ?? "")",
+            ])
+            let finished = OSAllocatedUnfairLock(initialState: false)
+            let finishOnce: () -> Void = {
+                let first = finished.withLock { done -> Bool in
+                    if done { return false }
+                    done = true
+                    return true
+                }
+                if first { completionHandler(.close) }
+            }
+            let task = URLSession.shared.dataTask(with: req) { _, _, _ in finishOnce() }
+            task.resume()
+            // Belt + suspenders: also attempt the local notification, and never
+            // hang past 3s if the network stalls.
             let content = UNMutableNotificationContent()
             content.title = "ScreenCP"
             content.body = "Tap to request time"
             content.interruptionLevel = .timeSensitive
             UNUserNotificationCenter.current().add(
                 UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
-            completionHandler(.close)
+            DispatchQueue.global().asyncAfter(deadline: .now() + 3) {
+                task.cancel()
+                finishOnce()
+            }
         default:
             completionHandler(.close)
         }

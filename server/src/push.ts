@@ -9,6 +9,8 @@ export interface Push {
 export interface PushSender {
   sendSilent(token: string): Promise<void>;
   sendVisible(token: string, title: string, body: string): Promise<void>;
+  /** Plain visible push, NO mutable-content — the NSE must not intercept/rewrite it. */
+  sendNudge(token: string, title: string, body: string): Promise<void>;
 }
 
 /**
@@ -60,6 +62,7 @@ export class Ladder implements Push {
 export class NoopSender implements PushSender {
   async sendSilent() {}
   async sendVisible() {}
+  async sendNudge() {}
 }
 
 /**
@@ -99,6 +102,21 @@ export class ApnsSender implements PushSender {
       console.log(`apns silent ok -> ${token.slice(0, 8)}`);
     } catch (err) {
       console.error(`apns silent FAILED -> ${token.slice(0, 8)}:`, err);
+      throw err;
+    }
+  }
+
+  async sendNudge(token: string, title: string, body: string): Promise<void> {
+    try {
+      await this.client.send(
+        new this.Notification(token, {
+          alert: { title, body },
+          aps: { 'interruption-level': 'time-sensitive' },
+        }),
+      );
+      console.log(`apns nudge ok -> ${token.slice(0, 8)}`);
+    } catch (err) {
+      console.error(`apns nudge FAILED -> ${token.slice(0, 8)}:`, err);
       throw err;
     }
   }
