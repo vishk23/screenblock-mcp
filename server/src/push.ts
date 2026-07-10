@@ -9,8 +9,9 @@ export interface Push {
 export interface PushSender {
   sendSilent(token: string): Promise<void>;
   sendVisible(token: string, title: string, body: string): Promise<void>;
-  /** Plain visible push, NO mutable-content — the NSE must not intercept/rewrite it. */
-  sendNudge(token: string, title: string, body: string): Promise<void>;
+  /** Plain visible push, NO mutable-content — the NSE must not intercept/rewrite it.
+   * `data` lands in the notification payload for deep-link routing on tap. */
+  sendNudge(token: string, title: string, body: string, data?: Record<string, string>): Promise<void>;
 }
 
 /**
@@ -106,12 +107,13 @@ export class ApnsSender implements PushSender {
     }
   }
 
-  async sendNudge(token: string, title: string, body: string): Promise<void> {
+  async sendNudge(token: string, title: string, body: string, data?: Record<string, string>): Promise<void> {
     try {
       await this.client.send(
         new this.Notification(token, {
           alert: { title, body },
           aps: { 'interruption-level': 'time-sensitive' },
+          ...(data ? { data } : {}),
         }),
       );
       console.log(`apns nudge ok -> ${token.slice(0, 8)}`);

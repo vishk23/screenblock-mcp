@@ -20,6 +20,7 @@
 		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8315F1A7CDE380E7CBE8F5CD /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC63273BBC58374DDF536C5 /* OnboardingView.swift */; };
 		8627215CEE37FE8C2141D561 /* UnlockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B134360FE0EE229150729A /* UnlockSheet.swift */; };
 		87CB99F6A268ACF324277FF0 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171183459AF315FD2CBFC7F8 /* NotificationService.swift */; };
 		88DDB3B07B4CF5596A4D2965 /* ScreenCPShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -92,6 +93,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0CC63273BBC58374DDF536C5 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		171183459AF315FD2CBFC7F8 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		23B134360FE0EE229150729A /* UnlockSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockSheet.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				9A3131938E0438D2114E0E7C /* AppDelegate.swift */,
 				6E6945394780099D6AC387EE /* BackendClient.swift */,
 				5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */,
+				0CC63273BBC58374DDF536C5 /* OnboardingView.swift */,
 				8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */,
 				938CBAF68EF8984183420816 /* Secrets.swift */,
 				91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */,
@@ -409,6 +412,7 @@
 				CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */,
 				FD1BFD127E76091EFF02C083 /* EnforcementEngine.swift in Sources */,
 				478657F796AA6E87613E5492 /* Models.swift in Sources */,
+				8315F1A7CDE380E7CBE8F5CD /* OnboardingView.swift in Sources */,
 				AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */,
 				6A4677A92B524610921F67FC /* Secrets.swift in Sources */,
 				5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */,

@@ -142,6 +142,30 @@ describe('MCP tools', () => {
     expect(big.isError).toBe(true);
   });
 
+  it('create_group sends a setup nudge with deep-link data to registered devices', async () => {
+    const repo = new FakeRepo(() => NOW);
+    const push = new FakePush();
+    const nudges: Array<{ token: string; body: string; data?: Record<string, string> }> = [];
+    const sender = {
+      sendSilent: async () => {},
+      sendVisible: async () => {},
+      sendNudge: async (token: string, _title: string, body: string, data?: Record<string, string>) => {
+        nudges.push({ token, body, data });
+      },
+    };
+    const server = buildMcpServer({ repo, push, config, sender, now: () => NOW });
+    const client = new Client({ name: 't', version: '0' });
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(st), client.connect(ct)]);
+    await repo.registerDevice('tok1');
+    await client.callTool({ name: 'create_group', arguments: { name: 'Games' } });
+    await new Promise((r) => setTimeout(r, 0)); // fire-and-forget settles
+    expect(nudges).toHaveLength(1);
+    expect(nudges[0].body).toMatch(/Choose apps for "Games"/);
+    expect(nudges[0].data?.screencp).toBe('setup');
+    expect(nudges[0].data?.groupId).toBeTruthy();
+  });
+
   it('set_group_mode updates mode and quota and shows in list_groups', async () => {
     const { call } = await setup();
     await call('create_group', { name: 'Instagram' });

@@ -5,7 +5,9 @@ struct ContentView: View {
     @StateObject private var sync = SyncCoordinator()
     @State private var authStatus = AuthorizationCenter.shared.authorizationStatus
     @State private var unlockGroup: RemoteGroup?
+    @State private var setupGroup: RemoteGroup?
     @State private var creatingStarters = false
+    @State private var showOnboarding = !AppGroupStore.suite.bool(forKey: "onboarded")
     @Environment(\.scenePhase) private var scenePhase
 
     /// Shield "Request time" button routes here via the ShieldAction extension.
@@ -13,6 +15,13 @@ struct ContentView: View {
         guard let gid = AppGroupStore.suite.string(forKey: "pendingUnlockGroupId"), !gid.isEmpty else { return }
         AppGroupStore.suite.removeObject(forKey: "pendingUnlockGroupId")
         unlockGroup = sync.groups.first { $0.id == gid } ?? AppGroupStore.groups.first { $0.id == gid }
+    }
+
+    /// "Choose apps for X" nudge (new group created from chat) routes here.
+    private func consumePendingSetup() {
+        guard let gid = AppGroupStore.suite.string(forKey: "pendingSetupGroupId"), !gid.isEmpty else { return }
+        AppGroupStore.suite.removeObject(forKey: "pendingSetupGroupId")
+        setupGroup = sync.groups.first { $0.id == gid } ?? AppGroupStore.groups.first { $0.id == gid }
     }
 
     private func createStarterGroups() {
@@ -78,11 +87,18 @@ struct ContentView: View {
                     Task {
                         await sync.syncNow()
                         consumePendingUnlock()
+                        consumePendingSetup()
                     }
                 }
             }
             .sheet(item: $unlockGroup) { group in
                 UnlockSheet(group: group, sync: sync)
+            }
+            .sheet(item: $setupGroup) { group in
+                NavigationStack { GroupDetailView(group: group, sync: sync, autoOpenPicker: true) }
+            }
+            .fullScreenCover(isPresented: $showOnboarding) {
+                OnboardingView(sync: sync) { showOnboarding = false }
             }
         }
     }
@@ -107,6 +123,7 @@ struct GroupRow: View {
 struct GroupDetailView: View {
     let group: RemoteGroup
     @ObservedObject var sync: SyncCoordinator
+    var autoOpenPicker = false
     @State private var selection = FamilyActivitySelection()
     @State private var pickerPresented = false
 
@@ -153,7 +170,12 @@ struct GroupDetailView: View {
         .navigationTitle(group.name)
         .sheet(isPresented: $unlockPresented) { UnlockSheet(group: group, sync: sync) }
         .familyActivityPicker(isPresented: $pickerPresented, selection: $selection)
-        .onAppear { selection = AppGroupStore.selection(for: group.id) ?? FamilyActivitySelection() }
+        .onAppear {
+            selection = AppGroupStore.selection(for: group.id) ?? FamilyActivitySelection()
+            if autoOpenPicker && !EnforcementEngine.hasContent(selection) {
+                pickerPresented = true
+            }
+        }
         .onChange(of: pickerPresented) { presented in
             guard !presented else { return }
             AppGroupStore.setSelection(selection, for: group.id)

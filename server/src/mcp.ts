@@ -149,6 +149,15 @@ export function buildMcpServer(deps: Deps): McpServer {
     }
     const group = await repo.createGroup(trimmed);
     const delivery = await afterMutation(`New group ${group.name}`, group.updatedAt);
+    // Setup nudge: tapping it opens the app straight into this group's picker.
+    if (deps.sender) {
+      const devices = await repo.listDevices();
+      void Promise.all(devices.map((d) => deps.sender!.sendNudge(
+        d.apnsToken, 'ScreenCP',
+        `Choose apps for "${group.name}" — tap to set up`,
+        { screencp: 'setup', groupId: group.id },
+      ).catch(() => {})));
+    }
     return ok({
       group: { id: group.id, name: group.name },
       note: 'Group created. Now open the ScreenCP iOS app and select which apps belong to this group — enforcement starts once apps are selected.',
