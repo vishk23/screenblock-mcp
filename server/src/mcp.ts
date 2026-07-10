@@ -65,7 +65,7 @@ export function buildMcpServer(deps: Deps): McpServer {
         'Core model — GROUPS are the only unit of control:',
         '- A group is a named set of apps (e.g. "Social"). Every policy and grant applies to a whole group.',
         '- Which apps are inside a group is invisible to you AND to the server — Apple privacy design. Only the user, in the iOS app, can see or change a group\'s apps. Never claim to know a group\'s contents.',
-        '- If the user asks to block/limit/grant a SPECIFIC APP (e.g. "give me 15 min of Instagram") and no matching group exists: offer two options — (a) create a group named after that app (create_group), reminding them to pick the app in the iOS app once, or (b) apply the action to an existing group that plausibly contains it, saying clearly it affects the whole group.',
+        '- If the user asks to block/limit/grant a SPECIFIC APP (e.g. "give me 15 min of Instagram") and no matching group exists: offer two options — (a) create a group named after that app (create_group), reminding them to pick the app in the iOS app once, or (b) apply the action to an existing group that plausibly contains it, saying clearly BEFORE acting that it affects every app in that group. After acting via a broader group, offer once to create a dedicated group for that app so future requests are surgical.',
         '- Groups may overlap. Grants PUNCH THROUGH other groups\' blocks for individually-picked apps (a grant on an "Instagram" group unblocks Instagram even while "Social" is blocked) — but NOT through category-based picks (opaque to subtraction). Prefer advising individual app picks.',
         '- Unlock modes (set_group_mode): each group is "strict" (chat-only unlocks — you are the only door), "quota" (N self-serve unlocks/day from the device, reason required), or "open". Help the user pick strictness in advance; strict is a commitment device — confirm before setting it.',
         '',
@@ -104,6 +104,10 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Read-only. Returns every group, its active policies (schedules, daily limits, blocks), active temporary grants with minutes remaining, and per-policy delivery state (applied = live on the device; pending = device has not applied it yet; no_device_registered = the iOS app has never connected).',
     inputSchema: {},
+    outputSchema: {
+      groups: z.array(z.any()), policies: z.array(z.any()), grants: z.array(z.any()),
+      device_connected: z.boolean(),
+    },
     annotations: { readOnlyHint: true },
   }, async () => {
     await repo.expireGrants(now());
@@ -132,6 +136,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Read-only. Lists the named app groups (e.g. "Social") with whether each has apps selected on the device and how many active policies it carries. Apps can only be added to a group by the user in the iOS app (Apple privacy rule).',
     inputSchema: {},
+    outputSchema: { groups: z.array(z.any()) },
     annotations: { readOnlyHint: true },
   }, async () => {
     const [groups, policies] = await Promise.all([repo.listGroups(), repo.listPolicies(true)]);
@@ -151,6 +156,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Creates a new empty named group (e.g. "Doomscroll"). The user must then open the ScreenCP iOS app to pick which apps belong to it — that step cannot be done from chat (Apple privacy rule). Tell the user to do this.',
     inputSchema: { name: z.string().min(1).max(60) },
+    outputSchema: { group: z.any(), note: z.string(), delivery: z.string() },
   }, async ({ name }) => {
     const trimmed = name.trim();
     const existing = await repo.listGroups();
@@ -186,6 +192,10 @@ export function buildMcpServer(deps: Deps): McpServer {
       end: hhmm(),
       timezone: z.string().optional(),
     },
+    outputSchema: {
+      policy: z.any(), group: z.string(), delivery: z.string(),
+      setup_required: z.string().optional(),
+    },
   }, async ({ group: name, days, start, end, timezone }) => {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
@@ -202,6 +212,10 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Caps a group\'s total usage per day (e.g. TikTok group: 30 minutes/day). The device shields the group once the limit is reached. Replaces any existing limit on the group.',
     inputSchema: { group: z.string(), minutes_per_day: z.number().int().min(1).max(1440) },
+    outputSchema: {
+      policy: z.any(), group: z.string(), delivery: z.string(),
+      setup_required: z.string().optional(),
+    },
   }, async ({ group: name, minutes_per_day }) => {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
@@ -215,6 +229,10 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Shields a group right now — indefinitely, or until the given ISO-8601 time. Cancels any active temporary grant on the group (a block issued after a grant wins). Use unblock to lift it.',
     inputSchema: { group: z.string(), until: z.string().datetime().optional() },
+    outputSchema: {
+      policy: z.any(), group: z.string(), delivery: z.string(),
+      cancelled_grants: z.number().optional(), setup_required: z.string().optional(),
+    },
   }, async ({ group: name, until }) => {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
@@ -234,6 +252,10 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Removes any immediate block on a group. Schedules and daily limits on the group stay active — the response lists them so you can tell the user what still applies. For a short exception prefer grant_temp_access.',
     inputSchema: { group: z.string() },
+    outputSchema: {
+      group: z.string(), removed_blocks: z.number(),
+      still_active: z.array(z.any()), delivery: z.string(),
+    },
     annotations: { destructiveHint: true },
   }, async ({ group: name }) => {
     const found = await findGroup(name);
@@ -262,6 +284,10 @@ export function buildMcpServer(deps: Deps): McpServer {
       minutes: z.number().int().min(1),
       reason: z.string().max(200).optional(),
     },
+    outputSchema: {
+      grant: z.any(), group: z.string(), delivery: z.string(),
+      note: z.string().optional(), setup_required: z.string().optional(),
+    },
   }, async ({ group: name, minutes, reason }) => {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
@@ -283,6 +309,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Deactivates a group\'s policy of the given kind (schedule, limit, or block). Confirm with the user before removing protective policies.',
     inputSchema: { group: z.string(), kind: z.enum(['schedule', 'limit', 'block']) },
+    outputSchema: { group: z.string(), kind: z.string(), removed: z.number(), delivery: z.string() },
     annotations: { destructiveHint: true },
   }, async ({ group: name, kind }) => {
     const found = await findGroup(name);
@@ -303,6 +330,10 @@ export function buildMcpServer(deps: Deps): McpServer {
       quota_per_day: z.number().int().min(0).max(20).optional(),
       quota_minutes: z.number().int().min(1).max(60).optional(),
     },
+    outputSchema: {
+      group: z.string(), mode: z.string(),
+      quotaPerDay: z.number(), quotaMinutes: z.number(), delivery: z.string(),
+    },
   }, async ({ group: name, mode, quota_per_day, quota_minutes }) => {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
@@ -320,6 +351,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Sets or replaces the user\'s goal for today (e.g. "3 focus hours"). Referenced by get_today_summary for coaching.',
     inputSchema: { text: z.string().min(1).max(300), target: z.string().max(60).optional() },
+    outputSchema: { goal: z.any() },
   }, async ({ text: goalText, target }) => {
     const date = todayInTz(config.timezone, now());
     const goal = await repo.upsertGoal(date, goalText, target ?? null);
@@ -333,6 +365,10 @@ export function buildMcpServer(deps: Deps): McpServer {
     description:
       'Read-only. Coaching data for a date (default today): the goal, how many times each group\'s shield appeared, shield-bypass taps, usage thresholds crossed (coarse usage signal — exact minute totals are not available off-device by Apple policy), and temporary grants used with reasons.',
     inputSchema: { date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() },
+    outputSchema: {
+      date: z.string(), goal: z.any(), shieldShown: z.record(z.number()),
+      shieldTaps: z.number(), thresholdsCrossed: z.array(z.any()), grantsUsed: z.array(z.any()),
+    },
     annotations: { readOnlyHint: true },
   }, async ({ date }) => {
     const day = date ?? todayInTz(config.timezone, now());
@@ -356,6 +392,9 @@ export function buildMcpServer(deps: Deps): McpServer {
     inputSchema: {
       start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
       end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    },
+    outputSchema: {
+      start: z.string(), end: z.string(), totals: z.any(), daily: z.array(z.any()),
     },
     annotations: { readOnlyHint: true },
   }, async ({ start_date, end_date }) => {
