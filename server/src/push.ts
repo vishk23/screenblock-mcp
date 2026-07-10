@@ -59,6 +59,19 @@ export class Ladder implements Push {
   }
 }
 
+/**
+ * Best-effort server-side re-block poke: fires the push ladder when a grant
+ * expires so the device re-shields even if its own OS timer failed to register.
+ * In-process timer — dies if the machine auto-stops (the device timers and
+ * reconcile-on-anything paths are the other layers of defense).
+ */
+export function scheduleExpiryPoke(push: Push, expiresAt: Date, description: string): void {
+  const ms = expiresAt.getTime() - Date.now() + 3_000;
+  if (ms <= 0 || ms > 90 * 60 * 1000) return;
+  const timer = setTimeout(() => push.policyChanged(new Date(), description), ms);
+  timer.unref?.();
+}
+
 /** Used when APNs env vars are unset (e.g. before Plan 2 registers a device). */
 export class NoopSender implements PushSender {
   async sendSilent() {}

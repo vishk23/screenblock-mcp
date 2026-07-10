@@ -2,7 +2,8 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import { z } from 'zod';
 import type { Repo } from './repo.js';
 import type { Config } from './config.js';
-import type { PushSender } from './push.js';
+import type { Push, PushSender } from './push.js';
+import { scheduleExpiryPoke } from './push.js';
 import { todayInTz } from './domain.js';
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
@@ -10,7 +11,7 @@ const wrap = (fn: AsyncHandler) => (req: Request, res: Response, next: NextFunct
   fn(req, res).catch(next);
 };
 
-export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: PushSender }): Router {
+export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: PushSender; push?: Push }): Router {
   const { repo, config } = deps;
   const router = Router();
 
@@ -80,6 +81,9 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
       new Date(startsAt.getTime() + minutes * 60_000), 'device_quota',
       body.data.id, startsAt,
     );
+    if (deps.push) {
+      scheduleExpiryPoke(deps.push, new Date(grant.expiresAt), `Time's up — re-locking ${group.name}`);
+    }
     res.json({ grant, remaining_today: remainingToday });
   }));
 

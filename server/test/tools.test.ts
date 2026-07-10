@@ -178,6 +178,28 @@ describe('MCP tools', () => {
     expect(l.json.groups[0]).toMatchObject({ name: 'Instagram', mode: 'quota', quotaPerDay: 3, quotaMinutes: 5 });
   });
 
+  it('grant_temp_access schedules an expiry poke that fires the push ladder', async () => {
+    const { vi } = await import('vitest');
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW); // scheduleExpiryPoke measures against Date.now()
+    try {
+      const repo = new FakeRepo(() => NOW);
+      const push = new FakePush();
+      const server = buildMcpServer({ repo, push, config, now: () => NOW });
+      const client = new Client({ name: 't', version: '0' });
+      const [ct, st] = InMemoryTransport.createLinkedPair();
+      await Promise.all([server.connect(st), client.connect(ct)]);
+      await client.callTool({ name: 'create_group', arguments: { name: 'Social' } });
+      await client.callTool({ name: 'grant_temp_access', arguments: { group: 'Social', minutes: 15, reason: 'bus' } });
+      const before = push.calls.length;
+      await vi.advanceTimersByTimeAsync(16 * 60 * 1000);
+      expect(push.calls.length).toBe(before + 1);
+      expect(push.calls.at(-1)?.description).toMatch(/re-locking Social/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('block_now cancels an active grant — later intent wins', async () => {
     const { repo, call } = await setup();
     await call('create_group', { name: 'Social' });

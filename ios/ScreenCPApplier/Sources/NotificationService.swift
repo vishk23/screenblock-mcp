@@ -52,6 +52,9 @@ final class NotificationService: UNNotificationServiceExtension {
             EnforcementEngine.applyImmediateShield(
                 groupId: group.id, policies: AppGroupStore.policies, grants: AppGroupStore.grants)
         }
+        // Re-block timers for any live grants (registration may or may not be
+        // permitted from this context — the server's expiry poke is the backstop).
+        EnforcementEngine.scheduleGrantEndTimers()
 
         // Upload any evidence stranded by the network-less shield extensions.
         let events = AppGroupStore.drainEvents()

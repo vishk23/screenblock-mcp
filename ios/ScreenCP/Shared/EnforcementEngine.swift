@@ -178,14 +178,42 @@ enum EnforcementEngine {
                 try? center.startMonitoring(.init("limit_\(group.id)"), during: schedule, events: events)
             }
 
-            // Grant expiry — one-shot window ending at expiresAt; intervalDidEnd re-blocks.
-            if let grant = activeGrant(for: group.id, in: grants),
-               let expires = ISO.date(grant.expiresAt), expires > Date() {
-                let cal = Calendar.current
-                let start = cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: Date())
-                let end = cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: expires)
-                let schedule = DeviceActivitySchedule(intervalStart: start, intervalEnd: end, repeats: false)
-                try? center.startMonitoring(.init("grantend_\(group.id)"), during: schedule)
+        }
+
+        scheduleGrantEndTimers(center: center)
+    }
+
+    /// One-shot re-block timers for every group with an active grant OR a live
+    /// single-app exemption. DeviceActivity rejects intervals shorter than ~15
+    /// minutes, so the window is padded to [expiry - 16 min, expiry] — a start
+    /// in the past just starts immediately; only intervalDidEnd matters.
+    static func scheduleGrantEndTimers(center: DeviceActivityCenter = DeviceActivityCenter(), now: Date = Date()) {
+        var groupExpiry: [String: Date] = [:]
+        for grant in AppGroupStore.grants + AppGroupStore.pendingLocalGrants {
+            guard grant.status == "pending" || grant.status == "active",
+                  let expires = ISO.date(grant.expiresAt), expires > now else { continue }
+            groupExpiry[grant.groupId] = max(groupExpiry[grant.groupId] ?? .distantPast, expires)
+        }
+        let exemptions = AppGroupStore.tokenExemptions.filter { $0.value > now }
+        if !exemptions.isEmpty {
+            for group in AppGroupStore.groups {
+                guard let sel = AppGroupStore.selection(for: group.id) else { continue }
+                for (token, expiry) in exemptions where sel.applicationTokens.contains(token) {
+                    groupExpiry[group.id] = max(groupExpiry[group.id] ?? .distantPast, expiry)
+                }
+            }
+        }
+        let cal = Calendar.current
+        for (groupId, expiry) in groupExpiry {
+            let paddedStart = expiry.addingTimeInterval(-16 * 60)
+            let schedule = DeviceActivitySchedule(
+                intervalStart: cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: paddedStart),
+                intervalEnd: cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: expiry),
+                repeats: false)
+            do {
+                try center.startMonitoring(.init("grantend_\(groupId)"), during: schedule)
+            } catch {
+                AppGroupStore.appendEvent(DeviceEvent(type: "grantend_register_failed", groupId: groupId))
             }
         }
     }
@@ -231,13 +259,8 @@ enum EnforcementEngine {
         AppGroupStore.grants = AppGroupStore.grants + [grant]
         AppGroupStore.pendingLocalGrants = AppGroupStore.pendingLocalGrants + [grant]
         applyAllImmediateShields(policies: AppGroupStore.policies, grants: AppGroupStore.grants, now: now)
-        // Best-effort re-block timer; the app/NSE/monitor reconcile is the backstop.
-        let cal = Calendar.current
-        let schedule = DeviceActivitySchedule(
-            intervalStart: cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now),
-            intervalEnd: cal.dateComponents([.year, .month, .day, .hour, .minute, .second], from: expires),
-            repeats: false)
-        try? DeviceActivityCenter().startMonitoring(.init("grantend_\(groupId)"), during: schedule)
+        // Padded re-block timer (see scheduleGrantEndTimers for the 15-min rule).
+        scheduleGrantEndTimers(now: now)
         AppGroupStore.appendEvent(DeviceEvent(type: "grant_started", groupId: groupId, meta: ["minutes": group.quotaMinutes]))
         return true
     }

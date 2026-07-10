@@ -47,7 +47,8 @@ final class MonitorExtension: DeviceActivityMonitor {
                 }
             }
             AppGroupStore.grants = grants
-            // Grant expiry changes punch-through exemptions for every group.
+            // Prune expired single-app holes, then re-shield everything.
+            AppGroupStore.tokenExemptions = AppGroupStore.tokenExemptions.filter { $0.value > Date() }
             EnforcementEngine.applyAllImmediateShields(policies: AppGroupStore.policies, grants: grants)
             AppGroupStore.appendEvent(DeviceEvent(type: "grant_expired", groupId: groupId))
         default:

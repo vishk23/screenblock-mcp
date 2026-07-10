@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import type { Repo } from './repo.js';
 import type { Push, PushSender } from './push.js';
+import { scheduleExpiryPoke } from './push.js';
 import type { Config } from './config.js';
 import type { Group, Policy } from './types.js';
 import {
@@ -303,6 +304,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     const expiresAt = new Date(now().getTime() + capped * 60_000);
     const grant = await repo.createGrant(found.group.id, capped, reason ?? null, expiresAt);
     const delivery = await afterMutation(`Allow ${found.group.name} for ${capped} min`, grant.updatedAt);
+    scheduleExpiryPoke(deps.push, expiresAt, `Time's up — re-locking ${found.group.name}`);
     return ok({
       grant: { id: grant.id, minutes: capped, expiresAt: grant.expiresAt, reason: grant.reason },
       group: found.group.name,
