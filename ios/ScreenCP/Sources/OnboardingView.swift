@@ -11,6 +11,7 @@ struct OnboardingView: View {
     @State private var authStatus = AuthorizationCenter.shared.authorizationStatus
     @State private var creatingStarters = false
     @State private var pickingGroup: RemoteGroup?
+    @State private var customName = ""
 
     var body: some View {
         TabView(selection: $page) {
@@ -23,7 +24,7 @@ struct OnboardingView: View {
         .tabViewStyle(.page)
         .indexViewStyle(.page(backgroundDisplayMode: .always))
         .sheet(item: $pickingGroup) { group in
-            NavigationStack { GroupDetailView(group: group, sync: sync, autoOpenPicker: true) }
+            SetupPickerView(group: group, sync: sync)
         }
     }
 
@@ -72,7 +73,7 @@ struct OnboardingView: View {
 
     private var groups: some View {
         pageBody(icon: "square.grid.2x2", "Build your groups",
-                 "Groups are what ChatGPT controls: block Social, limit Games, 15 minutes of Entertainment. Tap each group and pick its apps — choose individual apps (not whole categories) so per-app grants work later.") {
+                 "Groups are what ChatGPT controls: block Social, limit Games, 15 minutes of Entertainment. These three are just common starting points — add your own below, or rename/add later by telling ChatGPT. Tap each group and pick its apps.") {
             VStack(spacing: 12) {
                 if sync.groups.isEmpty {
                     Button(creatingStarters ? "Creating…" : "Create Social, Games & Entertainment") {
@@ -101,6 +102,20 @@ struct OnboardingView: View {
                                 Text(done ? "apps picked" : "pick apps").font(.caption).foregroundStyle(.secondary)
                             }
                             .padding(.horizontal)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    HStack {
+                        TextField("Add your own (e.g. Reddit)", text: $customName)
+                            .textFieldStyle(.roundedBorder)
+                        Button("Add") {
+                            let name = customName.trimmingCharacters(in: .whitespaces)
+                            guard !name.isEmpty else { return }
+                            customName = ""
+                            Task {
+                                try? await BackendClient.live.createGroup(name: name)
+                                await sync.syncNow()
+                            }
                         }
                         .buttonStyle(.bordered)
                     }

@@ -95,7 +95,7 @@ struct ContentView: View {
                 UnlockSheet(group: group, sync: sync)
             }
             .sheet(item: $setupGroup) { group in
-                NavigationStack { GroupDetailView(group: group, sync: sync, autoOpenPicker: true) }
+                SetupPickerView(group: group, sync: sync)
             }
             .fullScreenCover(isPresented: $showOnboarding) {
                 OnboardingView(sync: sync) { showOnboarding = false }
@@ -197,7 +197,7 @@ struct PolicyRow: View {
         case "block":
             Label(policy.until.flatMap { u in
                 ISO.date(u).map { "Blocked until \($0.formatted(date: .omitted, time: .shortened))" }
-            } ?? "Blocked", systemImage: "hand.raised.fill")
+            } ?? "Blocked until you (or ChatGPT) unblock it", systemImage: "hand.raised.fill")
         case "schedule":
             let days = (policy.daysOfWeek ?? []).map { Self.dayNames[$0] }.joined(separator: " ")
             Label("\(policy.startTime ?? "?")–\(policy.endTime ?? "?") \(days)", systemImage: "calendar")

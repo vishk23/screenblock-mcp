@@ -40,6 +40,7 @@ final class ShieldActionHandler: ShieldActionDelegate {
         switch action {
         case .secondaryButtonPressed:
             AppGroupStore.suite.set(groupId ?? "", forKey: "pendingUnlockGroupId")
+            AppGroupStore.appendEvent(DeviceEvent(type: "shield_action_tapped", groupId: groupId))
 
             // Local notifications from this extension are silently dropped on
             // some iOS versions — ask the server to send a real push instead

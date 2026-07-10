@@ -17,6 +17,7 @@
 		4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */; };
 		540F4B7363B0D5B5805BCAB6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		67E5C7048796FEAC6FC2B2DB /* SetupPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */; };
 		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -115,6 +116,7 @@
 		9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
 		B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F108E947B409386ACE147906 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
+		F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupPickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -199,6 +201,7 @@
 				0CC63273BBC58374DDF536C5 /* OnboardingView.swift */,
 				8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */,
 				938CBAF68EF8984183420816 /* Secrets.swift */,
+				F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */,
 				91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */,
 				9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */,
 				F108E947B409386ACE147906 /* SyncService.swift */,
@@ -415,6 +418,7 @@
 				8315F1A7CDE380E7CBE8F5CD /* OnboardingView.swift in Sources */,
 				AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */,
 				6A4677A92B524610921F67FC /* Secrets.swift in Sources */,
+				67E5C7048796FEAC6FC2B2DB /* SetupPickerView.swift in Sources */,
 				5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */,
 				B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */,
 				3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */,

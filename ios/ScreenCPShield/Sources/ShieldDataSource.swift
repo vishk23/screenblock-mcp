@@ -24,14 +24,21 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
     }
 
     private func branded() -> ShieldConfiguration {
-        ShieldConfiguration(
+        // After a "Request time" tap, the next render guides the user onward
+        // (the shield itself cannot open apps or post notifications reliably).
+        let pending = !(AppGroupStore.suite.string(forKey: "pendingUnlockGroupId") ?? "").isEmpty
+        return ShieldConfiguration(
             backgroundBlurStyle: .systemMaterialDark,
-            icon: UIImage(systemName: "hourglass"),
+            icon: UIImage(systemName: pending ? "arrow.up.forward.app" : "hourglass"),
             title: .init(text: "Blocked by ScreenCP", color: .white),
-            subtitle: .init(text: "Ask ChatGPT if you need time here.", color: .lightGray),
+            subtitle: .init(
+                text: pending
+                    ? "Request started — open ScreenCP to choose your reason and unlock."
+                    : "Ask ChatGPT if you need time here.",
+                color: .lightGray),
             primaryButtonLabel: .init(text: "OK", color: .black),
             primaryButtonBackgroundColor: .white,
-            secondaryButtonLabel: .init(text: "Request time", color: .white)
+            secondaryButtonLabel: .init(text: pending ? "Request pending…" : "Request time", color: .white)
         )
     }
 
