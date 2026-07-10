@@ -19,18 +19,23 @@ export interface Deps {
 
 const DAY_NUM: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 const dayEnum = z.enum(['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']);
-const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'must be HH:MM 24h');
+// Factory (not a shared instance): zod-to-JSON-schema dedupes repeated instances
+// into a $ref, which ChatGPT's manifest linter flags as "unclear arguments".
+const hhmm = () => z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'must be HH:MM 24h');
 
 type ToolResult = {
   content: Array<{ type: 'text'; text: string }>;
+  structuredContent?: Record<string, unknown>;
   isError?: boolean;
 };
 
 const ok = (obj: unknown): ToolResult => ({
   content: [{ type: 'text', text: JSON.stringify(obj) }],
+  structuredContent: obj as Record<string, unknown>,
 });
 const fail = (message: string): ToolResult => ({
   content: [{ type: 'text', text: JSON.stringify({ error: message }) }],
+  structuredContent: { error: message },
   isError: true,
 });
 
@@ -172,8 +177,8 @@ export function buildMcpServer(deps: Deps): McpServer {
     inputSchema: {
       group: z.string(),
       days: z.array(dayEnum).min(1),
-      start: hhmm,
-      end: hhmm,
+      start: hhmm(),
+      end: hhmm(),
       timezone: z.string().optional(),
     },
   }, async ({ group: name, days, start, end, timezone }) => {
