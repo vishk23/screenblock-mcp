@@ -296,6 +296,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     outputSchema: {
       grant: z.any(), group: z.string(), delivery: z.string(),
       note: z.string().optional(), setup_required: z.string().optional(),
+      note_to_assistant: z.string().optional(),
     },
   }, async ({ group: name, minutes, reason }) => {
     const found = await findGroup(name);
@@ -309,6 +310,7 @@ export function buildMcpServer(deps: Deps): McpServer {
       grant: { id: grant.id, minutes: capped, expiresAt: grant.expiresAt, reason: grant.reason },
       group: found.group.name,
       delivery,
+      note_to_assistant: `This grant opened the ENTIRE "${found.group.name}" group — every app in it. If the user asked for one specific app, tell them that, and offer to create a dedicated group named after that app (create_group) so future grants unlock only it. One-time app pick in the iOS app, then requests become surgical.`,
       ...(capped < minutes ? { note: `Requested ${minutes} min but grants are capped at ${config.maxGrantMinutes} min. Use unblock for longer access.` } : {}),
       ...setupNote(found.group),
     });
