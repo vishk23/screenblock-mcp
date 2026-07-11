@@ -248,12 +248,17 @@ export class PgRepo implements Repo {
   }
 
   async insertEvents(events: NewEvent[]) {
-    for (const e of events) {
-      await this.pool.query(
-        'insert into events (group_id, type, ts, meta) values ($1, $2, coalesce($3, now()), $4)',
-        [e.groupId ?? null, e.type, e.ts ?? null, JSON.stringify(e.meta ?? {})],
-      );
-    }
+    if (events.length === 0) return 0;
+    // One multi-row insert instead of N round-trips against a small pool.
+    const cols = 4;
+    const values: unknown[] = [];
+    const tuples = events.map((e, i) => {
+      values.push(e.groupId ?? null, e.type, e.ts ?? null, JSON.stringify(e.meta ?? {}));
+      const b = i * cols;
+      return `($${b + 1}, $${b + 2}, coalesce($${b + 3}::timestamptz, now()), $${b + 4})`;
+    });
+    await this.pool.query(
+      `insert into events (group_id, type, ts, meta) values ${tuples.join(', ')}`, values);
     return events.length;
   }
 

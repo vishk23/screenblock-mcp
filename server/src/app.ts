@@ -1,4 +1,5 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+import { timingSafeEqualStr } from './auth.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { buildMcpServer, type Deps } from './mcp.js';
 import { makeDeviceRouter } from './deviceApi.js';
@@ -13,8 +14,9 @@ export function makeApp(deps: Deps): Express {
 
   const mcpAuth = (req: Request, res: Response, next: NextFunction) => {
     const bearer = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '');
-    const pathSecret = req.params.secret;
-    if (bearer === deps.config.mcpBearerToken || pathSecret === deps.config.mcpBearerToken) {
+    const pathSecret = req.params.secret ?? '';
+    if (timingSafeEqualStr(bearer, deps.config.mcpBearerToken)
+        || timingSafeEqualStr(pathSecret, deps.config.mcpBearerToken)) {
       next();
       return;
     }

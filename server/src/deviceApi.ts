@@ -5,6 +5,7 @@ import type { Config } from './config.js';
 import type { Push, PushSender } from './push.js';
 import { scheduleExpiryPoke } from './push.js';
 import { todayInTz, computeEarnedRewards, productiveMinutes } from './domain.js';
+import { timingSafeEqualStr } from './auth.js';
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 const wrap = (fn: AsyncHandler) => (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +18,7 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
 
   router.use((req: Request, res: Response, next: NextFunction) => {
     const token = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '');
-    if (token !== config.deviceBearerToken) {
+    if (!timingSafeEqualStr(token, config.deviceBearerToken)) {
       res.status(401).json({ error: 'unauthorized' });
       return;
     }
@@ -102,7 +103,13 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
    * local notifications, so it asks the server to send a real push instead.
    * Plain visible (no mutable-content) so the NSE doesn't rewrite it.
    */
+  const nudgeTimes: number[] = [];
   router.post('/nudge', wrap(async (req, res) => {
+    // Cap push fan-out: at most 10 nudges/min across the (single-user) install.
+    const cutoff = Date.now() - 60_000;
+    while (nudgeTimes.length && nudgeTimes[0] < cutoff) nudgeTimes.shift();
+    if (nudgeTimes.length >= 10) { res.status(429).json({ error: 'rate_limited' }); return; }
+    nudgeTimes.push(Date.now());
     const body = z.object({ body: z.string().trim().min(1).max(120) }).safeParse(req.body);
     if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
     if (!deps.sender) { res.status(503).json({ error: 'push not configured' }); return; }
@@ -113,7 +120,11 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
   }));
 
   router.post('/register', wrap(async (req, res) => {
-    const body = z.object({ apnsToken: z.string().min(1) }).safeParse(req.body);
+    // Bound length + charset (real APNs = 64 hex; Mac = "mac-<uuid>"). Blocks
+    // oversized/binary junk device rows; no injection risk (parameterized).
+    const body = z.object({
+      apnsToken: z.string().min(1).max(200).regex(/^[A-Za-z0-9_-]+$/),
+    }).safeParse(req.body);
     if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
     const device = await repo.registerDevice(body.data.apnsToken);
     res.json({ device });
