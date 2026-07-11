@@ -1,0 +1,24 @@
+name: ScreenCPMac
+options:
+  deploymentTarget:
+    macOS: "13.0"
+settings:
+  base:
+    DEVELOPMENT_TEAM: R78VP2V5AQ
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.9"
+targets:
+  ScreenCPMac:
+    type: application
+    platform: macOS
+    sources:
+      - ScreenCPMac/Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.mac
+        GENERATE_INFOPLIST_FILE: YES
+        # Menu-bar only; no Dock icon. Deliberately NOT sandboxed — sandboxing
+        # forbids NSRunningApplication.terminate() on other apps (Apple docs).
+        INFOPLIST_KEY_LSUIElement: YES
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"

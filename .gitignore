@@ -1,2 +1,5 @@
 ios/ScreenCP/Sources/Secrets.swift
 server/.apns/
+
+# Mac (xcodegen-generated)
+mac/ScreenCPMac.xcodeproj/
