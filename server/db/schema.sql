@@ -73,3 +73,16 @@ alter table groups add column if not exists mode text not null default 'quota';
 alter table groups add column if not exists quota_per_day int not null default 2;
 alter table groups add column if not exists quota_minutes int not null default 10;
 alter table grants add column if not exists source text not null default 'chat';
+
+-- M3: earned time — productive Mac minutes buy phone rewards
+create table if not exists earn_rules (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null default 'default',
+  reward_group_id uuid not null references groups(id) on delete cascade,
+  threshold_minutes int not null,
+  reward_minutes int not null,
+  max_per_day int not null default 3,
+  active boolean not null default true,
+  updated_at timestamptz not null default now(),
+  unique (user_id, reward_group_id)
+);

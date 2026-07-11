@@ -1,4 +1,39 @@
-import type { Group, Device, Grant, Goal, EventRow } from './types.js';
+import type { Group, Device, Grant, Goal, EventRow, EarnRule } from './types.js';
+
+/** System chrome that must not count as "productive" foreground time. */
+const USAGE_NOISE = new Set(['loginwindow', 'screensaverengine', 'windowserver', 'lock screen']);
+
+/** Focused Mac minutes today: app_usage events NOT attributed to any group
+ * (mapped apps are distractions by definition) and not system noise. */
+export function productiveMinutes(events: EventRow[]): number {
+  let seconds = 0;
+  for (const e of events) {
+    if (e.type !== 'app_usage' || e.groupId !== null) continue;
+    if (USAGE_NOISE.has(String(e.meta.app ?? '').toLowerCase())) continue;
+    seconds += Number(e.meta.seconds ?? 0);
+  }
+  return Math.floor(seconds / 60);
+}
+
+/** Which rules have newly-crossed thresholds? One award per rule per call —
+ * remaining crossings re-fire on the next usage upload (fixpoint). */
+export function computeEarnedRewards(input: {
+  rules: EarnRule[];
+  todayEvents: EventRow[];
+  todayGrants: Grant[];
+}): EarnRule[] {
+  const focused = productiveMinutes(input.todayEvents);
+  const winners: EarnRule[] = [];
+  for (const rule of input.rules) {
+    if (!rule.active || rule.thresholdMinutes <= 0) continue;
+    const earnedToday = input.todayGrants.filter(
+      (g) => g.source === 'earned' && g.groupId === rule.rewardGroupId && g.status !== 'cancelled',
+    ).length;
+    if (earnedToday >= rule.maxPerDay) continue;
+    if (Math.floor(focused / rule.thresholdMinutes) > earnedToday) winners.push(rule);
+  }
+  return winners;
+}
 
 export function matchGroup(groups: Group[], query: string): Group | null {
   const q = query.trim().toLowerCase();

@@ -28,7 +28,7 @@ async function setup() {
 }
 
 describe('MCP tools', () => {
-  it('lists all 13 tools', async () => {
+  it('lists all 14 tools', async () => {
     const { repo, push } = { repo: new FakeRepo(), push: new FakePush() };
     const server = buildMcpServer({ repo, push, config, now: () => NOW });
     const client = new Client({ name: 't', version: '0' });
@@ -37,8 +37,8 @@ describe('MCP tools', () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'block_now', 'create_group', 'get_status', 'get_summary_range', 'get_today_summary',
-      'grant_temp_access', 'list_groups', 'remove_policy', 'set_goal', 'set_group_mode',
-      'set_limit', 'set_schedule', 'unblock',
+      'grant_temp_access', 'list_groups', 'remove_policy', 'set_earn_rule', 'set_goal',
+      'set_group_mode', 'set_limit', 'set_schedule', 'unblock',
     ]);
   });
 
@@ -198,6 +198,19 @@ describe('MCP tools', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('set_earn_rule upserts and get_status reports earning progress', async () => {
+    const { repo, call } = await setup();
+    await call('create_group', { name: 'TikTok' });
+    const r = await call('set_earn_rule', { group: 'TikTok', threshold_minutes: 60, reward_minutes: 15 });
+    expect(r.json).toMatchObject({ group: 'TikTok', thresholdMinutes: 60, rewardMinutes: 15, maxPerDay: 3, active: true });
+    await repo.insertEvents([
+      { type: 'app_usage', ts: '2026-07-08T10:00:00Z', meta: { platform: 'mac', app: 'Xcode', seconds: 2520 } }, // 42 focused min
+    ]);
+    const s = await call('get_status');
+    expect(s.json.earning.focusedMacMinutesToday).toBe(42);
+    expect(s.json.earning.rules[0]).toMatchObject({ group: 'TikTok', earnedToday: 0, minutesToNextReward: 18 });
   });
 
   it('block_now cancels an active grant — later intent wins', async () => {

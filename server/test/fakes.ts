@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Repo } from '../src/repo.js';
 import type {
-  Group, GroupMode, Policy, PolicyKind, Grant, GrantSource, Goal, EventRow, Device, NewEvent, SyncPayload,
+  Group, GroupMode, Policy, PolicyKind, Grant, GrantSource, Goal, EventRow, Device, NewEvent, SyncPayload, EarnRule,
 } from '../src/types.js';
 import type { Push } from '../src/push.js';
 
@@ -20,6 +20,7 @@ export class FakeRepo implements Repo {
   policies: Policy[] = [];
   grants: Grant[] = [];
   goals: Goal[] = [];
+  earnRules: EarnRule[] = [];
   events: EventRow[] = [];
   devices: Device[] = [];
   private eventId = 0;
@@ -119,6 +120,28 @@ export class FakeRepo implements Repo {
       }
     }
     return n;
+  }
+
+  async listEarnRules(activeOnly = true) {
+    return this.earnRules.filter((r) => !activeOnly || r.active);
+  }
+
+  async upsertEarnRule(rewardGroupId: string, thresholdMinutes: number, rewardMinutes: number, maxPerDay: number, active: boolean): Promise<EarnRule> {
+    const existing = this.earnRules.find((r) => r.rewardGroupId === rewardGroupId);
+    if (existing) {
+      existing.thresholdMinutes = thresholdMinutes;
+      existing.rewardMinutes = rewardMinutes;
+      existing.maxPerDay = maxPerDay;
+      existing.active = active;
+      existing.updatedAt = iso(this.nowFn());
+      return existing;
+    }
+    const rule: EarnRule = {
+      id: randomUUID(), rewardGroupId, thresholdMinutes, rewardMinutes, maxPerDay, active,
+      updatedAt: iso(this.nowFn()),
+    };
+    this.earnRules.push(rule);
+    return rule;
   }
 
   async upsertGoal(date: string, text: string, target: string | null): Promise<Goal> {

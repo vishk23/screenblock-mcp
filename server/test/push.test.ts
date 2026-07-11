@@ -27,7 +27,7 @@ describe('Ladder', () => {
     expect(sender.visible).toHaveLength(0);
 
     await vi.advanceTimersByTimeAsync(15_000);
-    expect(sender.visible).toEqual([{ token: 'tok1', body: 'Tap to apply: Block Social now' }]);
+    expect(sender.visible).toEqual([{ token: 'tok1', body: 'Block Social now' }]);
   });
 
   it('skips the visible fallback when a device acks in time', async () => {

@@ -17,10 +17,12 @@ class RecordingSender {
   async sendNudge(token: string, _title: string, body: string) { this.nudges.push({ token, body }); }
 }
 
-function makeApp(repo = new FakeRepo(), sender?: RecordingSender) {
+import { FakePush } from './fakes.js';
+
+function makeApp(repo = new FakeRepo(), sender?: RecordingSender, push?: FakePush) {
   const app = express();
   app.use(express.json());
-  app.use('/device', makeDeviceRouter({ repo, config, sender }));
+  app.use('/device', makeDeviceRouter({ repo, config, sender, push }));
   return { app, repo };
 }
 
@@ -105,6 +107,44 @@ describe('device unlock endpoint (POST /device/grants)', () => {
     const { app } = makeApp();
     await request(app).post('/device/grants').set(auth)
       .send({ groupId: '00000000-0000-0000-0000-000000000000', reason: 'x' }).expect(404);
+  });
+});
+
+describe('earned time (usage upload hook)', () => {
+  it('auto-grants when focused minutes cross the threshold; respects max_per_day; ignores mapped/noise usage', async () => {
+    const push = new FakePush();
+    const repo = new FakeRepo();
+    const { app } = makeApp(repo, undefined, push);
+    const g = await repo.createGroup('TikTok');
+    await repo.upsertEarnRule(g.id, 60, 15, 1, true);
+
+    // 30 focused min: below threshold — no grant
+    await request(app).post('/device/events').set(auth).send({ events: [
+      { type: 'app_usage', meta: { app: 'Xcode', seconds: 1800 } },
+    ] }).expect(200);
+    expect((await repo.listGrants()).filter((x) => x.source === 'earned')).toHaveLength(0);
+
+    // mapped (grouped) + noise usage must NOT count as focused
+    await request(app).post('/device/events').set(auth).send({ events: [
+      { type: 'app_usage', groupId: g.id, meta: { app: 'TikTok Web', seconds: 7200 } },
+      { type: 'app_usage', meta: { app: 'loginwindow', seconds: 7200 } },
+    ] }).expect(200);
+    expect((await repo.listGrants()).filter((x) => x.source === 'earned')).toHaveLength(0);
+
+    // +31 focused min crosses 60 — one earned grant + celebration push
+    await request(app).post('/device/events').set(auth).send({ events: [
+      { type: 'app_usage', meta: { app: 'Terminal', seconds: 1860 } },
+    ] }).expect(200);
+    const earned = (await repo.listGrants()).filter((x) => x.source === 'earned');
+    expect(earned).toHaveLength(1);
+    expect(earned[0].minutes).toBe(15);
+    expect(push.calls.some((c) => c.description.includes('earned 15 min of TikTok'))).toBe(true);
+
+    // way past 120 min, but max_per_day=1 — no second grant
+    await request(app).post('/device/events').set(auth).send({ events: [
+      { type: 'app_usage', meta: { app: 'Xcode', seconds: 7200 } },
+    ] }).expect(200);
+    expect((await repo.listGrants()).filter((x) => x.source === 'earned')).toHaveLength(1);
   });
 });
 

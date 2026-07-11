@@ -6,7 +6,7 @@ import { scheduleExpiryPoke } from './push.js';
 import type { Config } from './config.js';
 import type { Group, Policy } from './types.js';
 import {
-  matchGroup, deliveryState, grantRemainingMinutes, todayInTz, buildSummary,
+  matchGroup, deliveryState, grantRemainingMinutes, todayInTz, buildSummary, productiveMinutes,
 } from './domain.js';
 
 export interface Deps {
@@ -76,6 +76,7 @@ export function buildMcpServer(deps: Deps): McpServer {
         '- delivery "pending" = the phone has not applied the change yet (it usually applies within ~10s via push); "no_device_registered" = the iOS app has never connected.',
         '- Log grant reasons — they power coaching. When granting, ask for/record a short reason if the user gave none.',
         '- The user can also unlock at the shield itself (quota/open groups). Those grants reach the server on the device\'s next sync — if get_status shows no grant but the user says they just unlocked, TRUST THE USER; get_status pokes the device to sync, so re-check in a moment. last_device_sync tells you how fresh the picture is.',
+        '- Earned time (set_earn_rule): focused Mac minutes automatically buy phone unlocks — the reward economy. get_status.earning shows progress ("18 more focused minutes until 15 min of TikTok"). Encourage the user with it.',
         '- Coach with data: get_today_summary and get_summary_range show shield hits (times they bumped into a block), thresholds crossed (coarse usage), grants used with reasons, and macUsage — REAL per-app minutes from the user\'s Mac (AFK-excluded). iPhone minute totals remain impossible (Apple policy); Mac minutes are exact — use them.',
       ].join('\n'),
     },
@@ -109,14 +110,20 @@ export function buildMcpServer(deps: Deps): McpServer {
     outputSchema: {
       groups: z.array(z.any()), policies: z.array(z.any()), grants: z.array(z.any()),
       device_connected: z.boolean(), last_device_sync: z.string().nullable(),
+      earning: z.any(),
     },
     annotations: { readOnlyHint: true },
   }, async () => {
     await repo.expireGrants(now());
-    const [groups, policies, grants, devices] = await Promise.all([
+    const [groups, policies, grants, devices, earnRules] = await Promise.all([
       repo.listGroups(), repo.listPolicies(true),
-      repo.listGrants(['pending', 'active']), repo.listDevices(),
+      repo.listGrants(['pending', 'active']), repo.listDevices(), repo.listEarnRules(true),
     ]);
+    const todayEvents = await repo.listEventsOn(todayInTz(config.timezone, now()), config.timezone);
+    const focusedToday = productiveMinutes(todayEvents);
+    const allGrantsToday = (await repo.listGrants()).filter(
+      (g) => todayInTz(config.timezone, new Date(g.startsAt)) === todayInTz(config.timezone, now()),
+    );
     const nameOf = (id: string) => groups.find((g) => g.id === id)?.name ?? 'unknown';
     // Freshness poke: a silent push makes the device sync + upload any
     // shield-created grants, so the NEXT status read reflects them.
@@ -135,6 +142,22 @@ export function buildMcpServer(deps: Deps): McpServer {
         remainingMinutes: grantRemainingMinutes(g, now()),
         delivery: deliveryState(g.updatedAt, devices),
       })),
+      earning: {
+        focusedMacMinutesToday: focusedToday,
+        rules: earnRules.map((r) => {
+          const gname = groups.find((g) => g.id === r.rewardGroupId)?.name ?? 'unknown';
+          const earnedToday = allGrantsToday.filter(
+            (g) => g.source === 'earned' && g.groupId === r.rewardGroupId && g.status !== 'cancelled',
+          ).length;
+          return {
+            group: gname, thresholdMinutes: r.thresholdMinutes, rewardMinutes: r.rewardMinutes,
+            earnedToday, maxPerDay: r.maxPerDay,
+            minutesToNextReward: earnedToday >= r.maxPerDay
+              ? null
+              : Math.max(0, (earnedToday + 1) * r.thresholdMinutes - focusedToday),
+          };
+        }),
+      },
       device_connected: devices.length > 0,
       last_device_sync: lastSync,
     });
@@ -249,6 +272,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     const cancelledGrants = await repo.cancelGrants(found.group.id);
     const policy = await repo.replacePolicy(found.group.id, 'block', { until: until ?? null });
     const delivery = await afterMutation(`Block ${found.group.name} now`, policy.updatedAt);
+    if (until) scheduleExpiryPoke(deps.push, new Date(until), `${found.group.name} block ended`);
     return ok({
       policy: policyView(policy), group: found.group.name, delivery,
       ...(cancelledGrants > 0 ? { cancelled_grants: cancelledGrants } : {}),
@@ -355,6 +379,32 @@ export function buildMcpServer(deps: Deps): McpServer {
       group: updated.name, mode: updated.mode,
       quotaPerDay: updated.quotaPerDay, quotaMinutes: updated.quotaMinutes,
       delivery,
+    });
+  });
+
+  server.registerTool('set_earn_rule', {
+    title: 'Set an earned-time rule',
+    description:
+      'The Pomodoro-style reward economy: N focused minutes on the user\'s Mac automatically earn a temporary unlock of a group on their phone (e.g. "60 focused minutes earn 15 minutes of TikTok, max 3/day"). Focused = active Mac time in apps NOT mapped to any group. Rewards auto-grant with a celebration push and auto-re-lock at expiry. One rule per reward group (replaces existing). Set active=false to pause.',
+    inputSchema: {
+      group: z.string(),
+      threshold_minutes: z.number().int().min(5).max(480),
+      reward_minutes: z.number().int().min(1).max(60),
+      max_per_day: z.number().int().min(0).max(10).optional(),
+      active: z.boolean().optional(),
+    },
+    outputSchema: {
+      group: z.string(), thresholdMinutes: z.number(), rewardMinutes: z.number(),
+      maxPerDay: z.number(), active: z.boolean(),
+    },
+  }, async ({ group: name, threshold_minutes, reward_minutes, max_per_day, active }) => {
+    const found = await findGroup(name);
+    if ('error' in found) return found.error;
+    const rule = await repo.upsertEarnRule(
+      found.group.id, threshold_minutes, reward_minutes, max_per_day ?? 3, active ?? true);
+    return ok({
+      group: found.group.name, thresholdMinutes: rule.thresholdMinutes,
+      rewardMinutes: rule.rewardMinutes, maxPerDay: rule.maxPerDay, active: rule.active,
     });
   });
 

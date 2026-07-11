@@ -32,7 +32,7 @@ export interface Policy {
 // delivery state.
 export type GrantStatus = 'pending' | 'active' | 'expired' | 'cancelled';
 
-export type GrantSource = 'chat' | 'device_quota';
+export type GrantSource = 'chat' | 'device_quota' | 'earned';
 
 export interface Grant {
   id: string;
@@ -43,6 +43,16 @@ export interface Grant {
   expiresAt: string;
   status: GrantStatus;
   source: GrantSource;
+  updatedAt: string;
+}
+
+export interface EarnRule {
+  id: string;
+  rewardGroupId: string;
+  thresholdMinutes: number;
+  rewardMinutes: number;
+  maxPerDay: number;
+  active: boolean;
   updatedAt: string;
 }
 

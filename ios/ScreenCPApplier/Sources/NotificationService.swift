@@ -22,7 +22,9 @@ final class NotificationService: UNNotificationServiceExtension {
             let applied = await Self.syncAndApply()
             if applied, let content {
                 content.title = "ScreenCP"
-                content.body = "✓ Applied automatically — no tap needed"
+                // Keep the human message (celebrations, re-locks); the check mark
+                // signals it's already applied — no tap needed.
+                content.body = "✓ \(content.body)"
             }
             contentHandler(content ?? request.content)
         }

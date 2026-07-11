@@ -4,7 +4,7 @@ import type { Repo } from './repo.js';
 import type { Config } from './config.js';
 import type { Push, PushSender } from './push.js';
 import { scheduleExpiryPoke } from './push.js';
-import { todayInTz } from './domain.js';
+import { todayInTz, computeEarnedRewards, productiveMinutes } from './domain.js';
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 const wrap = (fn: AsyncHandler) => (req: Request, res: Response, next: NextFunction) => {
@@ -158,6 +158,32 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
     }).safeParse(req.body);
     if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
     const inserted = await repo.insertEvents(body.data.events);
+
+    // Earned time: fresh Mac usage may have crossed a reward threshold.
+    if (body.data.events.some((e) => e.type === 'app_usage')) {
+      const rules = await repo.listEarnRules(true);
+      if (rules.length > 0) {
+        const today = todayInTz(config.timezone);
+        const [todayEvents, allGrants, groups] = await Promise.all([
+          repo.listEventsOn(today, config.timezone), repo.listGrants(), repo.listGroups(),
+        ]);
+        const todayGrants = allGrants.filter(
+          (g) => todayInTz(config.timezone, new Date(g.startsAt)) === today,
+        );
+        for (const rule of computeEarnedRewards({ rules, todayEvents, todayGrants })) {
+          const group = groups.find((g) => g.id === rule.rewardGroupId);
+          if (!group) continue;
+          const expiresAt = new Date(Date.now() + rule.rewardMinutes * 60_000);
+          const grant = await repo.createGrant(
+            rule.rewardGroupId, rule.rewardMinutes,
+            `Earned: ${rule.thresholdMinutes} focused Mac minutes`, expiresAt, 'earned',
+          );
+          deps.push?.policyChanged(new Date(grant.updatedAt),
+            `You earned ${rule.rewardMinutes} min of ${group.name} 🎉`);
+          if (deps.push) scheduleExpiryPoke(deps.push, expiresAt, `Time's up — re-locking ${group.name}`);
+        }
+      }
+    }
     res.json({ inserted });
   }));
 

@@ -50,7 +50,7 @@ export class Ladder implements Push {
         if (acked) return;
         await Promise.all(
           latest.map((d) =>
-            this.sender.sendVisible(d.apnsToken, 'ScreenCP', `Tap to apply: ${description}`).catch(() => {}),
+            this.sender.sendVisible(d.apnsToken, 'ScreenCP', description).catch(() => {}),
           ),
         );
       })().catch(() => {});

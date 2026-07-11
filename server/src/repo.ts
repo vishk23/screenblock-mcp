@@ -1,5 +1,5 @@
 import type {
-  Group, GroupMode, Policy, PolicyKind, Grant, GrantSource, Goal, EventRow, Device, NewEvent, SyncPayload,
+  Group, GroupMode, Policy, PolicyKind, Grant, GrantSource, Goal, EventRow, Device, NewEvent, SyncPayload, EarnRule,
 } from './types.js';
 import pg from 'pg';
 
@@ -25,6 +25,10 @@ export interface Repo {
   expireGrants(now: Date): Promise<number>;
   /** Cancels pending/active grants for a group (a later block overrides an earlier grant). */
   cancelGrants(groupId: string): Promise<number>;
+
+  listEarnRules(activeOnly?: boolean): Promise<EarnRule[]>;
+  /** One rule per reward group (upsert). */
+  upsertEarnRule(rewardGroupId: string, thresholdMinutes: number, rewardMinutes: number, maxPerDay: number, active: boolean): Promise<EarnRule>;
 
   upsertGoal(date: string, text: string, target: string | null): Promise<Goal>;
   getGoal(date: string): Promise<Goal | null>;
@@ -195,6 +199,34 @@ export class PgRepo implements Repo {
       [groupId],
     );
     return rowCount ?? 0;
+  }
+
+  async listEarnRules(activeOnly = true) {
+    const { rows } = await this.pool.query(
+      activeOnly ? 'select * from earn_rules where active' : 'select * from earn_rules',
+    );
+    return rows.map((r: any): EarnRule => ({
+      id: r.id, rewardGroupId: r.reward_group_id, thresholdMinutes: r.threshold_minutes,
+      rewardMinutes: r.reward_minutes, maxPerDay: r.max_per_day, active: r.active,
+      updatedAt: r.updated_at.toISOString(),
+    }));
+  }
+
+  async upsertEarnRule(rewardGroupId: string, thresholdMinutes: number, rewardMinutes: number, maxPerDay: number, active: boolean) {
+    const { rows } = await this.pool.query(
+      `insert into earn_rules (reward_group_id, threshold_minutes, reward_minutes, max_per_day, active)
+       values ($1, $2, $3, $4, $5)
+       on conflict (user_id, reward_group_id) do update set
+         threshold_minutes = $2, reward_minutes = $3, max_per_day = $4, active = $5, updated_at = now()
+       returning *`,
+      [rewardGroupId, thresholdMinutes, rewardMinutes, maxPerDay, active],
+    );
+    const r = rows[0];
+    return {
+      id: r.id, rewardGroupId: r.reward_group_id, thresholdMinutes: r.threshold_minutes,
+      rewardMinutes: r.reward_minutes, maxPerDay: r.max_per_day, active: r.active,
+      updatedAt: r.updated_at.toISOString(),
+    } as EarnRule;
   }
 
   async upsertGoal(date: string, text: string, target: string | null) {
