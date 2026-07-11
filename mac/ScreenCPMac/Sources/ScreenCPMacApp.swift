@@ -41,14 +41,27 @@ struct SpikeMenu: View {
             }
 
             Divider()
-            Text("Blocked: \(blocker.blockedBundleIds.sorted().joined(separator: ", "))")
-                .font(.caption).foregroundStyle(.secondary)
-            Button(blocker.blockedBundleIds.contains(tracker.currentBundleId.lowercased())
-                   ? "Unblock \(tracker.currentApp)"
-                   : "Block \(tracker.currentApp)") {
-                blocker.toggleBlock(bundleId: tracker.currentBundleId)
+            Text("Blocked apps").font(.subheadline.bold())
+            if blocker.blockedBundleIds.isEmpty {
+                Text("None — switch to an app, then block it from here.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
-            .disabled(tracker.currentBundleId.isEmpty)
+            // Unblock must NOT depend on the app being frontmost — a blocked app
+            // can never become frontmost (we kill it). List with buttons instead.
+            ForEach(blocker.blockedBundleIds.sorted(), id: \.self) { bid in
+                HStack {
+                    Text(bid).font(.caption)
+                    Spacer()
+                    Button("Unblock") { blocker.toggleBlock(bundleId: bid) }
+                }
+            }
+            if !Blocker.protected.contains(tracker.currentBundleId.lowercased()),
+               !blocker.blockedBundleIds.contains(tracker.currentBundleId.lowercased()) {
+                Button("Block \(tracker.currentApp)") {
+                    blocker.toggleBlock(bundleId: tracker.currentBundleId)
+                }
+                .disabled(tracker.currentBundleId.isEmpty)
+            }
 
             Divider()
             Button("Quit ScreenCP Mac") { NSApplication.shared.terminate(nil) }

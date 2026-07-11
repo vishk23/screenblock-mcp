@@ -8,8 +8,15 @@ import Combine
 final class Blocker: ObservableObject {
     static let shared = Blocker()
 
-    /// Spike default: Apple News. Add/remove live from the menu.
-    @Published var blockedBundleIds: Set<String> = ["com.apple.news"]
+    /// In-memory for the spike (M1 replaces this with server-synced groups).
+    @Published var blockedBundleIds: Set<String> = []
+
+    /// Never-blockable: ourselves and apps whose loss bricks the session.
+    static let protected: Set<String> = [
+        Bundle.main.bundleIdentifier?.lowercased() ?? "com.vishnukchitti.screencp.mac",
+        "com.apple.finder", "com.apple.systempreferences", "com.apple.systemsettings",
+        "com.apple.dock", "com.apple.loginwindow",
+    ]
     @Published private(set) var killCount = 0
     @Published private(set) var lastKill = "—"
 
@@ -25,6 +32,7 @@ final class Blocker: ObservableObject {
 
     func toggleBlock(bundleId: String) {
         let bid = bundleId.lowercased()
+        guard !Self.protected.contains(bid), !bid.isEmpty else { return }
         if blockedBundleIds.contains(bid) {
             blockedBundleIds.remove(bid)
         } else {
