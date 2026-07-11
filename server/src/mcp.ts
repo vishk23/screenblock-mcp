@@ -76,7 +76,7 @@ export function buildMcpServer(deps: Deps): McpServer {
         '- delivery "pending" = the phone has not applied the change yet (it usually applies within ~10s via push); "no_device_registered" = the iOS app has never connected.',
         '- Log grant reasons — they power coaching. When granting, ask for/record a short reason if the user gave none.',
         '- The user can also unlock at the shield itself (quota/open groups). Those grants reach the server on the device\'s next sync — if get_status shows no grant but the user says they just unlocked, TRUST THE USER; get_status pokes the device to sync, so re-check in a moment. last_device_sync tells you how fresh the picture is.',
-        '- Coach with data: get_today_summary and get_summary_range show shield hits (times they bumped into a block), thresholds crossed (coarse usage), and grants used with reasons. Exact per-app minute totals are impossible off-device (Apple policy) — never promise them.',
+        '- Coach with data: get_today_summary and get_summary_range show shield hits (times they bumped into a block), thresholds crossed (coarse usage), grants used with reasons, and macUsage — REAL per-app minutes from the user\'s Mac (AFK-excluded). iPhone minute totals remain impossible (Apple policy); Mac minutes are exact — use them.',
       ].join('\n'),
     },
   );
@@ -380,6 +380,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     outputSchema: {
       date: z.string(), goal: z.any(), shieldShown: z.record(z.number()),
       shieldTaps: z.number(), thresholdsCrossed: z.array(z.any()), grantsUsed: z.array(z.any()),
+      macUsage: z.array(z.any()),
     },
     annotations: { readOnlyHint: true },
   }, async ({ date }) => {
@@ -420,7 +421,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     const [allGrants, groups] = await Promise.all([repo.listGrants(), repo.listGroups()]);
 
     const daily = [];
-    const totals = { shieldShown: 0, shieldTaps: 0, thresholdsCrossed: 0, grantsUsed: 0, grantMinutes: 0 };
+    const totals = { shieldShown: 0, shieldTaps: 0, thresholdsCrossed: 0, grantsUsed: 0, grantMinutes: 0, macMinutes: 0 };
     for (let i = 0; i < days; i++) {
       const date = new Date(start.getTime() + i * 86_400_000).toISOString().slice(0, 10);
       const [events, goal] = await Promise.all([
@@ -436,6 +437,7 @@ export function buildMcpServer(deps: Deps): McpServer {
       totals.thresholdsCrossed += s.thresholdsCrossed.length;
       totals.grantsUsed += s.grantsUsed.length;
       totals.grantMinutes += s.grantsUsed.reduce((a, g) => a + g.minutes, 0);
+      totals.macMinutes += s.macUsage.reduce((a, u) => a + u.minutes, 0);
       daily.push({ date, ...s });
     }
     return ok({ start: start_date, end: end_date, totals, daily });

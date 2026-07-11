@@ -20,6 +20,8 @@ final class MacSync: ObservableObject {
 
     private var timer: Timer?
     private var eventQueue: [MacEvent] = []
+    private var lastUsageFlush = Date()
+    static let usageFlushInterval: TimeInterval = 300
 
     func start() {
         timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
@@ -40,6 +42,16 @@ final class MacSync: ObservableObject {
     }
 
     func syncNow() async {
+        // The insight the iPhone can never provide: real per-app minutes.
+        if Date().timeIntervalSince(lastUsageFlush) >= Self.usageFlushInterval {
+            lastUsageFlush = Date()
+            for entry in Tracker.shared.drainUnflushed() {
+                eventQueue.append(MacEvent(type: "app_usage", groupId: groupId(forBundleId: entry.bundleId), meta: [
+                    "platform": "mac", "app": entry.app,
+                    "bundleId": entry.bundleId, "seconds": String(entry.seconds),
+                ]))
+            }
+        }
         do {
             try await MacBackend.register()
             let payload = try await MacBackend.sync()

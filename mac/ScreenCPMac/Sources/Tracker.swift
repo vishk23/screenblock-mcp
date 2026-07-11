@@ -14,6 +14,8 @@ final class Tracker: ObservableObject {
     @Published private(set) var idleSeconds: Double = 0
     /// Foreground seconds per app this session (AFK time excluded).
     @Published private(set) var secondsByApp: [String: Int] = [:]
+    /// Seconds accumulated since the last upload flush (app name -> (bundleId, secs)).
+    private(set) var unflushed: [String: (bundleId: String, seconds: Int)] = [:]
 
     private var timer: Timer?
     static let afkThreshold: Double = 60
@@ -41,7 +43,18 @@ final class Tracker: ObservableObject {
         idleSeconds = Self.systemIdleSeconds()
         if idleSeconds < Self.afkThreshold, currentApp != "—" {
             secondsByApp[currentApp, default: 0] += 1
+            let prev = unflushed[currentApp]?.seconds ?? 0
+            unflushed[currentApp] = (currentBundleId, prev + 1)
         }
+    }
+
+    /// Hands the accumulated usage to the uploader and resets the buffer.
+    func drainUnflushed(minSeconds: Int = 15) -> [(app: String, bundleId: String, seconds: Int)] {
+        let out = unflushed
+            .filter { $0.value.seconds >= minSeconds }
+            .map { (app: $0.key, bundleId: $0.value.bundleId, seconds: $0.value.seconds) }
+        unflushed = [:]
+        return out
     }
 
     /// No permission required (returns an aggregate, not event contents).

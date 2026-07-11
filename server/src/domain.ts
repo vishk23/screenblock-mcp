@@ -40,6 +40,8 @@ export interface Summary {
   shieldTaps: number;
   thresholdsCrossed: Array<{ group: string; thresholdMinutes: number; at: string }>;
   grantsUsed: Array<{ group: string; minutes: number; reason: string | null; source: string }>;
+  /** Real per-app foreground minutes from the Mac agent (AFK-excluded). */
+  macUsage: Array<{ app: string; minutes: number }>;
 }
 
 export function buildSummary(input: {
@@ -54,9 +56,13 @@ export function buildSummary(input: {
   const shieldShown: Record<string, number> = {};
   let shieldTaps = 0;
   const thresholdsCrossed: Summary['thresholdsCrossed'] = [];
+  const macSeconds: Record<string, number> = {};
 
   for (const e of input.events) {
-    if (e.type === 'shield_shown') {
+    if (e.type === 'app_usage') {
+      const app = String(e.meta.app ?? 'unknown');
+      macSeconds[app] = (macSeconds[app] ?? 0) + Number(e.meta.seconds ?? 0);
+    } else if (e.type === 'shield_shown') {
       const name = nameOf(e.groupId);
       shieldShown[name] = (shieldShown[name] ?? 0) + 1;
     } else if (e.type === 'shield_action_tapped') {
@@ -78,5 +84,10 @@ export function buildSummary(input: {
     grantsUsed: input.grants.map((g) => ({
       group: nameOf(g.groupId), minutes: g.minutes, reason: g.reason, source: g.source,
     })),
+    macUsage: Object.entries(macSeconds)
+      .map(([app, secs]) => ({ app, minutes: Math.round(secs / 60) }))
+      .filter((u) => u.minutes > 0)
+      .sort((a, b) => b.minutes - a.minutes)
+      .slice(0, 20),
   };
 }
