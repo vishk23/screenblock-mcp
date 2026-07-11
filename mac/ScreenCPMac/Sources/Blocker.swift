@@ -8,8 +8,18 @@ import Combine
 final class Blocker: ObservableObject {
     static let shared = Blocker()
 
-    /// In-memory for the spike (M1 replaces this with server-synced groups).
-    @Published var blockedBundleIds: Set<String> = []
+    /// Manual quick-blocks from the menu (in-memory).
+    @Published var manualBlocked: Set<String> = []
+    /// Synced from the server every 30s (groups × policies × grants).
+    @Published private(set) var serverBlocked: Set<String> = []
+
+    var blockedBundleIds: Set<String> { manualBlocked.union(serverBlocked) }
+
+    func applyServerBlocklist(_ blocked: Set<String>) {
+        let added = !blocked.subtracting(serverBlocked).isEmpty
+        serverBlocked = blocked.subtracting(Self.protected)
+        if added { sweep() }
+    }
 
     /// Never-blockable: ourselves and apps whose loss bricks the session.
     static let protected: Set<String> = [
@@ -33,10 +43,10 @@ final class Blocker: ObservableObject {
     func toggleBlock(bundleId: String) {
         let bid = bundleId.lowercased()
         guard !Self.protected.contains(bid), !bid.isEmpty else { return }
-        if blockedBundleIds.contains(bid) {
-            blockedBundleIds.remove(bid)
+        if manualBlocked.contains(bid) {
+            manualBlocked.remove(bid)
         } else {
-            blockedBundleIds.insert(bid)
+            manualBlocked.insert(bid)
             sweep()
         }
     }
@@ -60,5 +70,10 @@ final class Blocker: ObservableObject {
         app.forceTerminate()
         killCount += 1
         lastKill = "\(app.localizedName ?? bid) at \(Date().formatted(date: .omitted, time: .standard))"
+        // Same coaching signal as the iPhone shield: user bumped into a block.
+        MacSync.shared.enqueue(MacEvent(
+            type: "shield_shown",
+            groupId: MacSync.shared.groupId(forBundleId: bid),
+            meta: ["platform": "mac", "app": app.localizedName ?? bid]))
     }
 }
