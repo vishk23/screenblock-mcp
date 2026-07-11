@@ -18,8 +18,9 @@ struct OnboardingView: View {
             welcome.tag(0)
             permission.tag(1)
             groups.tag(2)
-            modes.tag(3)
-            connect.tag(4)
+            perApp.tag(3)
+            modes.tag(4)
+            connect.tag(5)
         }
         .tabViewStyle(.page)
         .indexViewStyle(.page(backgroundDisplayMode: .always))
@@ -130,10 +131,57 @@ struct OnboardingView: View {
         }
     }
 
+    private static let hotApps = ["TikTok", "Instagram", "X", "YouTube", "Snapchat"]
+    @State private var creatingHot: String?
+
+    /// The page the group/matrix confusion kept pointing at: hot apps get their
+    /// OWN group so "give me 10 minutes of TikTok" unlocks only TikTok.
+    private var perApp: some View {
+        pageBody(icon: "scope", "Give your worst apps their own group",
+                 "Grants work on whole groups. If TikTok lives only inside Social, \u{201C}10 minutes of TikTok\u{201D} opens ALL of Social. Give a tempting app its own group and requests become surgical — it can stay in Social too; the single-app group wins.") {
+            VStack(spacing: 10) {
+                ForEach(Self.hotApps, id: \.self) { name in
+                    let existing = sync.groups.first { $0.name.lowercased() == name.lowercased() }
+                    let done = existing.flatMap { g in
+                        AppGroupStore.selection(for: g.id).map(EnforcementEngine.hasContent)
+                    } ?? false
+                    Button {
+                        if let existing {
+                            pickingGroup = existing
+                        } else {
+                            creatingHot = name
+                            Task {
+                                try? await BackendClient.live.createGroup(name: name)
+                                await sync.syncNow()
+                                creatingHot = nil
+                                pickingGroup = sync.groups.first { $0.name.lowercased() == name.lowercased() }
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: done ? "checkmark.circle.fill" : "plus.circle")
+                                .foregroundStyle(done ? .green : .secondary)
+                            Text(name)
+                            Spacer()
+                            if creatingHot == name { ProgressView() }
+                        }
+                        .padding(.horizontal)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                Text("Optional — skip if none of these tempt you.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("Continue") { withAnimation { page = 4 } }
+                    .buttonStyle(.borderedProminent)
+            }
+            .padding(.horizontal)
+        }
+    }
+
     private var modes: some View {
         pageBody(icon: "lock.shield", "Choose your strictness — later, in chat",
                  "Every group has an unlock mode you set by talking to ChatGPT:\n\n“Make Social strict” — chat is the only way out.\n“Give Games 2 unlocks of 10 minutes a day” — self-serve with a reason, rationed.\n“Keep News open” — unlock freely.\n\nYou pick your prison's strictness in advance, not in the moment of temptation.") {
-            Button("Continue") { withAnimation { page = 4 } }
+            Button("Continue") { withAnimation { page = 5 } }
                 .buttonStyle(.borderedProminent)
         }
     }

@@ -62,7 +62,7 @@ struct ContentView: View {
                         NavigationLink {
                             GroupDetailView(group: group, sync: sync)
                         } label: {
-                            GroupRow(group: group, policies: sync.policies)
+                            GroupRow(group: group, policies: sync.policies, grants: sync.grants)
                         }
                     }
                 }
@@ -76,7 +76,7 @@ struct ContentView: View {
                 }
 
                 Section {
-                    NavigationLink("Debug: manual shield spike") { SpikeView() }
+                    NavigationLink("Developer tools") { SpikeView() }
                 }
             }
             .navigationTitle("ScreenCP")
@@ -107,15 +107,54 @@ struct ContentView: View {
 struct GroupRow: View {
     let group: RemoteGroup
     let policies: [RemotePolicy]
+    let grants: [RemoteGrant]
+
+    private var modeIcon: String {
+        switch group.mode {
+        case "strict": return "lock.fill"
+        case "open": return "lock.open"
+        default: return "circle.grid.2x1"
+        }
+    }
+
+    private var summary: (text: String, color: Color) {
+        let has = AppGroupStore.selection(for: group.id).map(EnforcementEngine.hasContent) ?? false
+        guard has else { return ("No apps selected — tap to choose", .orange) }
+
+        if let grant = EnforcementEngine.activeGrant(for: group.id, in: grants),
+           let until = ISO.date(grant.expiresAt) {
+            return ("Open until \(until.formatted(date: .omitted, time: .shortened))", .green)
+        }
+
+        var parts: [String] = []
+        let mine = policies.filter { $0.groupId == group.id }
+        if mine.contains(where: { $0.kind == "block" }) { parts.append("Blocked") }
+        for p in mine where p.kind == "schedule" {
+            parts.append("\(p.startTime ?? "?")–\(p.endTime ?? "?")")
+        }
+        for p in mine where p.kind == "limit" {
+            parts.append("\(p.minutesPerDay ?? 0) min/day")
+        }
+        switch group.mode {
+        case "quota":
+            let used = EnforcementEngine.quotaUsedToday(
+                groupId: group.id, grants: grants + AppGroupStore.pendingLocalGrants)
+            parts.append("\(max(0, group.quotaPerDay - used)) of \(group.quotaPerDay) unlocks left")
+        case "strict":
+            parts.append("strict")
+        default: break
+        }
+        return (parts.isEmpty ? "No rules yet — set them from ChatGPT" : parts.joined(separator: " · "), .secondary)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(group.name)
-            let has = AppGroupStore.selection(for: group.id).map(EnforcementEngine.hasContent) ?? false
-            let count = policies.filter { $0.groupId == group.id }.count
-            Text(has ? "\(count) active polic\(count == 1 ? "y" : "ies")" : "⚠️ no apps selected — tap to choose")
-                .font(.caption)
-                .foregroundStyle(has ? Color.secondary : Color.orange)
+            HStack(spacing: 6) {
+                Text(group.name)
+                Image(systemName: modeIcon).font(.caption2).foregroundStyle(.secondary)
+            }
+            let s = summary
+            Text(s.text).font(.caption).foregroundStyle(s.color)
         }
     }
 }
@@ -136,6 +175,12 @@ struct GroupDetailView: View {
                     Label("Strict mode — unlocks only through your ChatGPT coach", systemImage: "lock.fill")
                         .foregroundStyle(.secondary)
                 } else {
+                    if group.mode == "quota" {
+                        let used = EnforcementEngine.quotaUsedToday(
+                            groupId: group.id, grants: sync.grants + AppGroupStore.pendingLocalGrants)
+                        LabeledContent("Unlocks left today",
+                                       value: "\(max(0, group.quotaPerDay - used)) of \(group.quotaPerDay)")
+                    }
                     Button {
                         unlockPresented = true
                     } label: {
@@ -144,8 +189,9 @@ struct GroupDetailView: View {
                 }
             } footer: {
                 Text(group.mode == "quota"
-                     ? "\(group.quotaPerDay) self-serve unlocks of \(group.quotaMinutes) min per day, reason required."
-                     : group.mode == "open" ? "Open mode — unlock freely." : "")
+                     ? "Each unlock lasts \(group.quotaMinutes) min, reason required. Change the rules by telling ChatGPT."
+                     : group.mode == "open" ? "Open mode — unlock freely. Tell ChatGPT to make it stricter."
+                     : "Only your ChatGPT coach can unlock this group.")
             }
             Section("Apps in this group") {
                 Button("Choose apps (\(selection.applicationTokens.count) apps, \(selection.categoryTokens.count) categories)") {
