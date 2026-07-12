@@ -194,7 +194,7 @@ describe('MCP tools', () => {
       const before = push.calls.length;
       await vi.advanceTimersByTimeAsync(16 * 60 * 1000);
       expect(push.calls.length).toBe(before + 1);
-      expect(push.calls.at(-1)?.description).toMatch(/re-locking Social/);
+      expect(push.calls.at(-1)?.description).toMatch(/Social is locked again/);
     } finally {
       vi.useRealTimers();
     }

@@ -13,6 +13,7 @@ targets:
     platform: macOS
     sources:
       - ScreenCPMac/Sources
+      - ScreenCPMac/Resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.mac
@@ -20,5 +21,6 @@ targets:
         # Menu-bar only; no Dock icon. Deliberately NOT sandboxed — sandboxing
         # forbids NSRunningApplication.terminate() on other apps (Apple docs).
         INFOPLIST_KEY_LSUIElement: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"

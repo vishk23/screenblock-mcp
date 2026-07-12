@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0329E9BD4E86C588B0C94697 /* ShieldActionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7587888E97478D128AE65CF0 /* ShieldActionHandler.swift */; };
 		2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */; };
+		2166DEA69E81D117BC4DBAD2 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		2796E3A1CA204E26FB9C7D01 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		39C95B2EC3490D5C2F7846F6 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
@@ -17,11 +18,13 @@
 		4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */; };
 		540F4B7363B0D5B5805BCAB6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		5C539374B0466C50924AF364 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		67E5C7048796FEAC6FC2B2DB /* SetupPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */; };
 		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8315F1A7CDE380E7CBE8F5CD /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC63273BBC58374DDF536C5 /* OnboardingView.swift */; };
+		837C905453272C916F201A3E /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		8627215CEE37FE8C2141D561 /* UnlockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B134360FE0EE229150729A /* UnlockSheet.swift */; };
 		87CB99F6A268ACF324277FF0 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171183459AF315FD2CBFC7F8 /* NotificationService.swift */; };
 		88DDB3B07B4CF5596A4D2965 /* ScreenCPShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -34,8 +37,11 @@
 		AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */; };
 		B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */; };
 		B2990C2DA0DBD43591A768D1 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
+		B97D341D774D0F76BC927336 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		BB847333C9AFEBAD6773923C /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
+		BF477227A683047996E156E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6D3DAFBC67881E84E5506891 /* Assets.xcassets */; };
 		C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
+		C7EE1698E858B31EA7CC0D94 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */; };
 		D68B3A76A2832F04E2BF582A /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		DB3EF94D5128649632BD4B59 /* ScreenCPApplier.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -103,6 +109,7 @@
 		59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorExtension.swift; sourceTree = "<group>"; };
 		5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5F7341B4D1B1435CAFE58912 /* ScreenCP.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScreenCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6D3DAFBC67881E84E5506891 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6E6945394780099D6AC387EE /* BackendClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendClient.swift; sourceTree = "<group>"; };
 		7587888E97478D128AE65CF0 /* ShieldActionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionHandler.swift; sourceTree = "<group>"; };
 		75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -114,6 +121,7 @@
 		975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnforcementEngine.swift; sourceTree = "<group>"; };
 		9A3131938E0438D2114E0E7C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
+		A0BB6BD51B1771E3A6F2205F /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
 		B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F108E947B409386ACE147906 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupPickerView.swift; sourceTree = "<group>"; };
@@ -132,6 +140,7 @@
 		26BDD55FACF8B9386BE903AC = {
 			isa = PBXGroup;
 			children = (
+				49346FA8666E96DAD5820143 /* Resources */,
 				60B5BE589DDA57FFF5122FA7 /* Shared */,
 				F2959C3B03A0216EC55E9A4B /* Sources */,
 				30690A32FF9187C31BBBDA53 /* Sources */,
@@ -169,6 +178,15 @@
 			path = ScreenCPApplier/Sources;
 			sourceTree = "<group>";
 		};
+		49346FA8666E96DAD5820143 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6D3DAFBC67881E84E5506891 /* Assets.xcassets */,
+			);
+			name = Resources;
+			path = ScreenCP/Resources;
+			sourceTree = "<group>";
+		};
 		4B0E68F28C1B35EAB9CAAC8F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -185,6 +203,7 @@
 			isa = PBXGroup;
 			children = (
 				2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */,
+				A0BB6BD51B1771E3A6F2205F /* Brand.swift */,
 				975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */,
 				841BBC193A5364DD09CBF2FF /* Models.swift */,
 			);
@@ -219,6 +238,7 @@
 			buildConfigurationList = 3D53704D0FE2645BDC2B242A /* Build configuration list for PBXNativeTarget "ScreenCP" */;
 			buildPhases = (
 				F3BF9CA16C92CF7490201386 /* Sources */,
+				1A9C8FB09BA8CCF2F3AB86DC /* Resources */,
 				7667882506465E7EEE3D0201 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -358,12 +378,24 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		1A9C8FB09BA8CCF2F3AB86DC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BF477227A683047996E156E7 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		4CB61270EDB0F475CB2F3593 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				D68B3A76A2832F04E2BF582A /* AppGroupStore.swift in Sources */,
+				2166DEA69E81D117BC4DBAD2 /* Brand.swift in Sources */,
 				BB847333C9AFEBAD6773923C /* EnforcementEngine.swift in Sources */,
 				540F4B7363B0D5B5805BCAB6 /* Models.swift in Sources */,
 				A512A0835888895A87FD8F90 /* ShieldDataSource.swift in Sources */,
@@ -375,6 +407,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */,
+				5C539374B0466C50924AF364 /* Brand.swift in Sources */,
 				E5D4301365A5312823E0E919 /* EnforcementEngine.swift in Sources */,
 				8C8461D5B9213E346050B4C4 /* Models.swift in Sources */,
 				2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */,
@@ -386,6 +419,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E0EBC64CBEA99880165686BB /* AppGroupStore.swift in Sources */,
+				C7EE1698E858B31EA7CC0D94 /* Brand.swift in Sources */,
 				B2990C2DA0DBD43591A768D1 /* EnforcementEngine.swift in Sources */,
 				2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */,
 				4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */,
@@ -398,6 +432,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92DECF3A92E409F10B870C9A /* AppGroupStore.swift in Sources */,
+				837C905453272C916F201A3E /* Brand.swift in Sources */,
 				96B6E681ED743ED067FD7BE9 /* EnforcementEngine.swift in Sources */,
 				2796E3A1CA204E26FB9C7D01 /* Models.swift in Sources */,
 				87CB99F6A268ACF324277FF0 /* NotificationService.swift in Sources */,
@@ -412,6 +447,7 @@
 				9C0989A7267F0653544CE3BE /* AppDelegate.swift in Sources */,
 				A7FFEA15FD70A8E1B9382C52 /* AppGroupStore.swift in Sources */,
 				F5F533C19502C1CE67C1B8D9 /* BackendClient.swift in Sources */,
+				B97D341D774D0F76BC927336 /* Brand.swift in Sources */,
 				CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */,
 				FD1BFD127E76091EFF02C083 /* EnforcementEngine.swift in Sources */,
 				478657F796AA6E87613E5492 /* Models.swift in Sources */,

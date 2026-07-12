@@ -235,7 +235,7 @@ export function buildMcpServer(deps: Deps): McpServer {
       daysOfWeek: [...new Set(days.map((d) => DAY_NUM[d]))].sort(),
       startTime: start, endTime: end, timezone: timezone ?? config.timezone,
     });
-    const delivery = await afterMutation(`Schedule for ${found.group.name}`, policy.updatedAt);
+    const delivery = await afterMutation(`📅 ${found.group.name}: blocked ${start}–${end}`, policy.updatedAt);
     return ok({ policy: policyView(policy), group: found.group.name, delivery, ...setupNote(found.group) });
   });
 
@@ -252,7 +252,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
     const policy = await repo.replacePolicy(found.group.id, 'limit', { minutesPerDay: minutes_per_day });
-    const delivery = await afterMutation(`Daily limit for ${found.group.name}`, policy.updatedAt);
+    const delivery = await afterMutation(`⏳ ${found.group.name}: ${minutes_per_day} min/day from now on`, policy.updatedAt);
     return ok({ policy: policyView(policy), group: found.group.name, delivery, ...setupNote(found.group) });
   });
 
@@ -271,8 +271,8 @@ export function buildMcpServer(deps: Deps): McpServer {
     // Later intent wins: an explicit block ends any grant currently in effect.
     const cancelledGrants = await repo.cancelGrants(found.group.id);
     const policy = await repo.replacePolicy(found.group.id, 'block', { until: until ?? null });
-    const delivery = await afterMutation(`Block ${found.group.name} now`, policy.updatedAt);
-    if (until) scheduleExpiryPoke(deps.push, new Date(until), `${found.group.name} block ended`);
+    const delivery = await afterMutation(`🔒 ${found.group.name} is locked`, policy.updatedAt);
+    if (until) scheduleExpiryPoke(deps.push, new Date(until), `🔓 ${found.group.name}: timed block finished`);
     return ok({
       policy: policyView(policy), group: found.group.name, delivery,
       ...(cancelledGrants > 0 ? { cancelled_grants: cancelledGrants } : {}),
@@ -296,7 +296,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     const removed = await repo.deactivatePolicies(found.group.id, 'block');
     const remaining = (await repo.listPolicies(true)).filter((p) => p.groupId === found.group.id);
     const changedAt = now().toISOString();
-    const delivery = await afterMutation(`Unblock ${found.group.name}`, changedAt);
+    const delivery = await afterMutation(`🔓 ${found.group.name} is open again`, changedAt);
     return ok({
       group: found.group.name,
       removed_blocks: removed,
@@ -328,8 +328,8 @@ export function buildMcpServer(deps: Deps): McpServer {
     const capped = Math.min(minutes, config.maxGrantMinutes);
     const expiresAt = new Date(now().getTime() + capped * 60_000);
     const grant = await repo.createGrant(found.group.id, capped, reason ?? null, expiresAt);
-    const delivery = await afterMutation(`Allow ${found.group.name} for ${capped} min`, grant.updatedAt);
-    scheduleExpiryPoke(deps.push, expiresAt, `Time's up — re-locking ${found.group.name}`);
+    const delivery = await afterMutation(`🔓 ${found.group.name}: ${capped} minutes, then it re-locks itself`, grant.updatedAt);
+    scheduleExpiryPoke(deps.push, expiresAt, `⏰ Time's up — ${found.group.name} is locked again`);
     return ok({
       grant: { id: grant.id, minutes: capped, expiresAt: grant.expiresAt, reason: grant.reason },
       group: found.group.name,
@@ -352,7 +352,7 @@ export function buildMcpServer(deps: Deps): McpServer {
     if ('error' in found) return found.error;
     const removed = await repo.deactivatePolicies(found.group.id, kind);
     if (removed === 0) return fail(`Group "${found.group.name}" has no active ${kind} policy.`);
-    const delivery = await afterMutation(`Remove ${kind} from ${found.group.name}`, now().toISOString());
+    const delivery = await afterMutation(`🗑 ${found.group.name}: ${kind} rule removed`, now().toISOString());
     return ok({ group: found.group.name, kind, removed, delivery });
   });
 
@@ -374,7 +374,11 @@ export function buildMcpServer(deps: Deps): McpServer {
     const found = await findGroup(name);
     if ('error' in found) return found.error;
     const updated = await repo.setGroupMode(found.group.id, mode, quota_per_day, quota_minutes);
-    const delivery = await afterMutation(`${found.group.name} is now ${mode} mode`, updated.updatedAt);
+    const delivery = await afterMutation(mode === 'strict'
+      ? `🔐 ${found.group.name} is now strict — your coach holds the only key`
+      : mode === 'quota'
+        ? `🎟 ${found.group.name}: ${updated.quotaPerDay} self-serve unlocks of ${updated.quotaMinutes} min per day`
+        : `🔓 ${found.group.name} is now open mode`, updated.updatedAt);
     return ok({
       group: updated.name, mode: updated.mode,
       quotaPerDay: updated.quotaPerDay, quotaMinutes: updated.quotaMinutes,

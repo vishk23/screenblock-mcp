@@ -83,7 +83,7 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
       body.data.id, startsAt,
     );
     if (deps.push) {
-      scheduleExpiryPoke(deps.push, new Date(grant.expiresAt), `Time's up — re-locking ${group.name}`);
+      scheduleExpiryPoke(deps.push, new Date(grant.expiresAt), `⏰ Time's up — ${group.name} is locked again`);
     }
     res.json({ grant, remaining_today: remainingToday });
   }));
@@ -190,8 +190,8 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
             `Earned: ${rule.thresholdMinutes} focused Mac minutes`, expiresAt, 'earned',
           );
           deps.push?.policyChanged(new Date(grant.updatedAt),
-            `You earned ${rule.rewardMinutes} min of ${group.name} 🎉`);
-          if (deps.push) scheduleExpiryPoke(deps.push, expiresAt, `Time's up — re-locking ${group.name}`);
+            `🎉 You earned ${rule.rewardMinutes} min of ${group.name} — enjoy it, you worked for it`);
+          if (deps.push) scheduleExpiryPoke(deps.push, expiresAt, `⏰ Break's over — ${group.name} is locked again`);
         }
       }
     }

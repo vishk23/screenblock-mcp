@@ -17,6 +17,7 @@ targets:
     sources:
       - ScreenCP/Sources
       - ScreenCP/Shared
+      - ScreenCP/Resources
     dependencies:
       - target: ScreenCPMonitor
       - target: ScreenCPApplier
@@ -28,6 +29,7 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         CODE_SIGN_ENTITLEMENTS: ScreenCP/ScreenCP.entitlements
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     info:
       path: ScreenCP/Info.plist
       properties:
