@@ -41,37 +41,67 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
             EnforcementEngine.quotaUsedToday(
                 groupId: $0, grants: AppGroupStore.grants + AppGroupStore.pendingLocalGrants)
         } ?? 0
+        let hits = AppGroupStore.shieldHitsToday(groupId: groupId)
 
-        var subtitle = "Ask ChatGPT if you need time here."
+        // Title carries the group name; streak-aware so the shield never goes stale.
+        let name = group?.name ?? "This app"
+        let title = Self.streakTitle(name: name, hits: hits)
+
+        var subtitle = "Ask your coach in \(Brand.name) if you need time here."
         var unlockLabel: String?
         switch group?.mode {
         case "quota":
             let left = max(0, (group?.quotaPerDay ?? 0) - used)
             if left > 0 {
                 unlockLabel = singleApp
-                    ? "Unlock this app \(group?.quotaMinutes ?? 10) min (\(left) left)"
-                    : "Unlock \(group?.quotaMinutes ?? 10) min (\(left) left today)"
-                subtitle = "One tap spends a ration — your coach sees it."
+                    ? "Unlock this app · \(group?.quotaMinutes ?? 10) min"
+                    : "Unlock \(group?.quotaMinutes ?? 10) min"
+                subtitle = "\(left) of \(group?.quotaPerDay ?? 0) unlocks left today — one tap spends one."
             } else {
-                subtitle = "All \(group?.quotaPerDay ?? 0) unlocks used today. Ask ChatGPT."
+                subtitle = "You've used all \(group?.quotaPerDay ?? 0) unlocks today. Ask your coach."
             }
         case "open":
             unlockLabel = "Unlock \(group?.quotaMinutes ?? 10) min"
+            subtitle = "Open mode — a tap gives you \(group?.quotaMinutes ?? 10) minutes."
         case "strict":
-            subtitle = "Strict mode — your ChatGPT coach is the only door."
+            subtitle = "Strict mode — your coach in \(Brand.name) holds the only key."
         default:
             break
         }
 
         return ShieldConfiguration(
-            backgroundBlurStyle: .systemMaterialDark,
-            icon: UIImage(systemName: "hourglass"),
-            title: .init(text: "Blocked by ScreenCP", color: .white),
-            subtitle: .init(text: subtitle, color: .lightGray),
-            primaryButtonLabel: .init(text: "OK", color: .black),
+            backgroundBlurStyle: .systemThinMaterialDark,
+            backgroundColor: Self.tint(for: name),
+            icon: UIImage(systemName: hits >= 4 ? "exclamationmark.circle" : "hourglass"),
+            title: .init(text: title, color: .white),
+            subtitle: .init(text: subtitle, color: UIColor.white.withAlphaComponent(0.75)),
+            primaryButtonLabel: .init(text: "Not now", color: Self.tint(for: name)),
             primaryButtonBackgroundColor: .white,
             secondaryButtonLabel: unlockLabel.map { .init(text: $0, color: .white) }
         )
+    }
+
+    /// Escalating copy: gentle first, more pointed as the day's attempts pile up.
+    static func streakTitle(name: String, hits: Int) -> String {
+        switch hits {
+        case 0, 1: return "\(name) is blocked"
+        case 2, 3: return "\(name) again?"
+        case 4, 5: return "\(name) — that's \(hits) times today"
+        default:   return "\(name) · \(hits)× today. Everything okay?"
+        }
+    }
+
+    /// Stable per-group color from the name, so each group reads as its own place.
+    static func tint(for name: String) -> UIColor {
+        let palette: [UIColor] = [
+            UIColor(red: 0.36, green: 0.20, blue: 0.66, alpha: 1), // indigo
+            UIColor(red: 0.13, green: 0.32, blue: 0.55, alpha: 1), // blue
+            UIColor(red: 0.55, green: 0.20, blue: 0.42, alpha: 1), // magenta
+            UIColor(red: 0.16, green: 0.40, blue: 0.38, alpha: 1), // teal
+            UIColor(red: 0.52, green: 0.30, blue: 0.16, alpha: 1), // amber-brown
+        ]
+        let h = abs(name.lowercased().hashValue)
+        return palette[h % palette.count]
     }
 
     /// Most-specific group containing this app token (per-app groups win).
@@ -96,6 +126,7 @@ final class ShieldDataSource: ShieldConfigurationDataSource {
         let now = Date().timeIntervalSince1970
         if now - AppGroupStore.suite.double(forKey: key) < 30 { return }
         AppGroupStore.suite.set(now, forKey: key)
+        _ = AppGroupStore.bumpShieldHitToday(groupId: groupId)
         AppGroupStore.appendEvent(DeviceEvent(type: "shield_shown", groupId: groupId))
     }
 }

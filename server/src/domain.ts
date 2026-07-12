@@ -35,6 +35,38 @@ export function computeEarnedRewards(input: {
   return winners;
 }
 
+export interface EarningStatus {
+  focusedMacMinutesToday: number;
+  rules: Array<{
+    group: string; thresholdMinutes: number; rewardMinutes: number;
+    earnedToday: number; maxPerDay: number; minutesToNextReward: number | null;
+  }>;
+}
+
+export function earningStatus(input: {
+  earnRules: EarnRule[];
+  groups: Group[];
+  todayEvents: EventRow[];
+  todayGrants: Grant[];
+}): EarningStatus {
+  const focused = productiveMinutes(input.todayEvents);
+  return {
+    focusedMacMinutesToday: focused,
+    rules: input.earnRules.map((r) => {
+      const group = input.groups.find((g) => g.id === r.rewardGroupId)?.name ?? 'unknown';
+      const earnedToday = input.todayGrants.filter(
+        (g) => g.source === 'earned' && g.groupId === r.rewardGroupId && g.status !== 'cancelled',
+      ).length;
+      return {
+        group, thresholdMinutes: r.thresholdMinutes, rewardMinutes: r.rewardMinutes,
+        earnedToday, maxPerDay: r.maxPerDay,
+        minutesToNextReward: earnedToday >= r.maxPerDay
+          ? null : Math.max(0, (earnedToday + 1) * r.thresholdMinutes - focused),
+      };
+    }),
+  };
+}
+
 export function matchGroup(groups: Group[], query: string): Group | null {
   const q = query.trim().toLowerCase();
   if (q === '') return null;

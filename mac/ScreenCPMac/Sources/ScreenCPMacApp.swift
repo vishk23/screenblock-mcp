@@ -34,7 +34,9 @@ struct SpikeMenu: View {
     @ObservedObject private var tracker = Tracker.shared
     @ObservedObject private var blocker = Blocker.shared
     @ObservedObject private var sync = MacSync.shared
+    @ObservedObject private var today = MacToday.shared
     @Environment(\.openWindow) private var openWindow
+    @State private var showDetails = false
 
     private func statusLine(for group: RemoteGroup) -> (String, Color) {
         let sel = sync.selections[group.id, default: []]
@@ -49,7 +51,32 @@ struct SpikeMenu: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("ScreenCP Mac").font(.headline)
+            HStack {
+                Image(systemName: "hourglass").foregroundStyle(.tint)
+                Text(Brand.name).font(.headline)
+                Spacer()
+            }
+
+            if let d = today.day {
+                let f = d.earning.focusedMacMinutesToday
+                LabeledContent {
+                    Text(f >= 60 ? "\(f / 60)h \(f % 60)m" : "\(f)m")
+                        .font(.title3.bold().monospacedDigit()).foregroundStyle(.green)
+                } label: { Label("Focused today", systemImage: "laptopcomputer") }
+
+                ForEach(d.earning.rules, id: \.group) { r in
+                    if let toGo = r.minutesToNextReward {
+                        VStack(alignment: .leading, spacing: 2) {
+                            ProgressView(value: Double(max(0, r.thresholdMinutes - toGo)), total: Double(r.thresholdMinutes))
+                                .tint(.green)
+                            Text(toGo == 0 ? "\(r.group) reward ready 🎉"
+                                 : "\(toGo) more min → \(r.rewardMinutes) min of \(r.group)")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                Divider()
+            }
 
             if !sync.groups.isEmpty {
                 Text("Groups").font(.subheadline.bold())
@@ -75,43 +102,30 @@ struct SpikeMenu: View {
                 Divider()
             }
 
-            LabeledContent("Frontmost", value: tracker.currentApp)
-            LabeledContent("Idle", value: String(format: "%.0fs", tracker.idleSeconds))
-            LabeledContent("Kills", value: "\(blocker.killCount) (\(blocker.lastKill))")
-
-            Divider()
-            Text("This session").font(.subheadline.bold())
-            ForEach(tracker.secondsByApp.sorted { $0.value > $1.value }.prefix(5), id: \.key) { name, secs in
-                LabeledContent(name, value: secs >= 60 ? "\(secs / 60)m \(secs % 60)s" : "\(secs)s")
-            }
-
-            Divider()
-            Text("Blocked apps").font(.subheadline.bold())
-            if blocker.blockedBundleIds.isEmpty {
-                Text("None — switch to an app, then block it from here.")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-            // Unblock must NOT depend on the app being frontmost — a blocked app
-            // can never become frontmost (we kill it). List with buttons instead.
-            ForEach(blocker.blockedBundleIds.sorted(), id: \.self) { bid in
-                HStack {
-                    Text(bid).font(.caption)
-                    Spacer()
-                    Button("Unblock") { blocker.toggleBlock(bundleId: bid) }
+            DisclosureGroup("Details", isExpanded: $showDetails) {
+                VStack(alignment: .leading, spacing: 6) {
+                    LabeledContent("Frontmost", value: tracker.currentApp)
+                    LabeledContent("Kills today", value: "\(blocker.killCount)")
+                    if !blocker.blockedBundleIds.isEmpty {
+                        Text("Blocked now").font(.caption.bold()).foregroundStyle(.secondary)
+                        ForEach(blocker.blockedBundleIds.sorted(), id: \.self) { bid in
+                            HStack {
+                                Text(bid).font(.caption).lineLimit(1)
+                                Spacer()
+                                Button("Unblock") { blocker.toggleBlock(bundleId: bid) }.controlSize(.small)
+                            }
+                        }
+                    }
                 }
+                .padding(.top, 4)
             }
-            if !Blocker.protected.contains(tracker.currentBundleId.lowercased()),
-               !blocker.blockedBundleIds.contains(tracker.currentBundleId.lowercased()) {
-                Button("Block \(tracker.currentApp)") {
-                    blocker.toggleBlock(bundleId: tracker.currentBundleId)
-                }
-                .disabled(tracker.currentBundleId.isEmpty)
-            }
+            .font(.caption)
 
             Divider()
-            Button("Quit ScreenCP Mac") { NSApplication.shared.terminate(nil) }
+            Button("Quit \(Brand.name)") { NSApplication.shared.terminate(nil) }
         }
         .padding(14)
-        .frame(width: 300)
+        .frame(width: 320)
+        .task { await today.load() }
     }
 }

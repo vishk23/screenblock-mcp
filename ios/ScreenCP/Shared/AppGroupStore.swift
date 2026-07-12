@@ -35,6 +35,22 @@ enum AppGroupStore {
         set { suite.set(try? JSONEncoder().encode(newValue), forKey: "grants"); flush() }
     }
 
+    /// Per-group shield hits today (survives event upload/drain). Used for
+    /// streak-aware shield copy. Keyed by "YYYY-MM-DD|groupId".
+    static func bumpShieldHitToday(groupId: String?) -> Int {
+        let day = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let key = "hits_\(day)_\(groupId ?? "none")"
+        let n = suite.integer(forKey: key) + 1
+        suite.set(n, forKey: key)
+        flush()
+        return n
+    }
+
+    static func shieldHitsToday(groupId: String?) -> Int {
+        let day = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        return suite.integer(forKey: "hits_\(day)_\(groupId ?? "none")")
+    }
+
     /// Single-app unlock exemptions (token -> expiry). Enforcement-side only:
     /// the coaching grant row is group-scoped, but the shield hole is one app.
     static var tokenExemptions: [ApplicationToken: Date] {

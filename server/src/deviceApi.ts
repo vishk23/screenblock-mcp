@@ -4,7 +4,7 @@ import type { Repo } from './repo.js';
 import type { Config } from './config.js';
 import type { Push, PushSender } from './push.js';
 import { scheduleExpiryPoke } from './push.js';
-import { todayInTz, computeEarnedRewards, productiveMinutes } from './domain.js';
+import { todayInTz, computeEarnedRewards, buildSummary, earningStatus } from './domain.js';
 import { timingSafeEqualStr } from './auth.js';
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
@@ -128,6 +128,28 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
     if (!body.success) { res.status(400).json({ error: body.error.message }); return; }
     const device = await repo.registerDevice(body.data.apnsToken);
     res.json({ device });
+  }));
+
+  /** Rich today-view for the app dashboards: coaching summary + earn progress
+   * + live grants. Device-authed (no MCP). */
+  router.get('/summary', wrap(async (req, res) => {
+    await repo.expireGrants(new Date());
+    const today = todayInTz(config.timezone);
+    const [events, allGrants, goal, groups, earnRules] = await Promise.all([
+      repo.listEventsOn(today, config.timezone), repo.listGrants(),
+      repo.getGoal(today), repo.listGroups(), repo.listEarnRules(true),
+    ]);
+    const todayGrants = allGrants.filter(
+      (g) => todayInTz(config.timezone, new Date(g.startsAt)) === today && g.status !== 'cancelled');
+    const nameOf = (id: string | null) => groups.find((g) => g.id === id)?.name ?? 'unknown';
+    res.json({
+      date: today,
+      summary: buildSummary({ events, grants: todayGrants, goal, groups }),
+      earning: earningStatus({ earnRules, groups, todayEvents: events, todayGrants }),
+      activeGrants: allGrants
+        .filter((g) => (g.status === 'pending' || g.status === 'active') && new Date(g.expiresAt) > new Date())
+        .map((g) => ({ group: nameOf(g.groupId), expiresAt: g.expiresAt, reason: g.reason })),
+    });
   }));
 
   router.get('/sync', wrap(async (req, res) => {

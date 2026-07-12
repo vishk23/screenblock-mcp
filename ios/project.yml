@@ -104,6 +104,7 @@ targets:
     sources:
       - ScreenCPShield/Sources
       - ScreenCP/Shared
+      - ScreenCP/Shared/Brand.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.shield

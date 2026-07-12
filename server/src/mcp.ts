@@ -6,7 +6,7 @@ import { scheduleExpiryPoke } from './push.js';
 import type { Config } from './config.js';
 import type { Group, Policy } from './types.js';
 import {
-  matchGroup, deliveryState, grantRemainingMinutes, todayInTz, buildSummary, productiveMinutes,
+  matchGroup, deliveryState, grantRemainingMinutes, todayInTz, buildSummary, productiveMinutes, earningStatus,
 } from './domain.js';
 
 export interface Deps {
@@ -119,11 +119,10 @@ export function buildMcpServer(deps: Deps): McpServer {
       repo.listGroups(), repo.listPolicies(true),
       repo.listGrants(['pending', 'active']), repo.listDevices(), repo.listEarnRules(true),
     ]);
-    const todayEvents = await repo.listEventsOn(todayInTz(config.timezone, now()), config.timezone);
-    const focusedToday = productiveMinutes(todayEvents);
-    const allGrantsToday = (await repo.listGrants()).filter(
-      (g) => todayInTz(config.timezone, new Date(g.startsAt)) === todayInTz(config.timezone, now()),
-    );
+    const today = todayInTz(config.timezone, now());
+    const todayEvents = await repo.listEventsOn(today, config.timezone);
+    const todayGrants = (await repo.listGrants()).filter(
+      (g) => todayInTz(config.timezone, new Date(g.startsAt)) === today);
     const nameOf = (id: string) => groups.find((g) => g.id === id)?.name ?? 'unknown';
     // Freshness poke: a silent push makes the device sync + upload any
     // shield-created grants, so the NEXT status read reflects them.
@@ -142,22 +141,7 @@ export function buildMcpServer(deps: Deps): McpServer {
         remainingMinutes: grantRemainingMinutes(g, now()),
         delivery: deliveryState(g.updatedAt, devices),
       })),
-      earning: {
-        focusedMacMinutesToday: focusedToday,
-        rules: earnRules.map((r) => {
-          const gname = groups.find((g) => g.id === r.rewardGroupId)?.name ?? 'unknown';
-          const earnedToday = allGrantsToday.filter(
-            (g) => g.source === 'earned' && g.groupId === r.rewardGroupId && g.status !== 'cancelled',
-          ).length;
-          return {
-            group: gname, thresholdMinutes: r.thresholdMinutes, rewardMinutes: r.rewardMinutes,
-            earnedToday, maxPerDay: r.maxPerDay,
-            minutesToNextReward: earnedToday >= r.maxPerDay
-              ? null
-              : Math.max(0, (earnedToday + 1) * r.thresholdMinutes - focusedToday),
-          };
-        }),
-      },
+      earning: earningStatus({ earnRules, groups, todayEvents, todayGrants }),
       device_connected: devices.length > 0,
       last_device_sync: lastSync,
     });

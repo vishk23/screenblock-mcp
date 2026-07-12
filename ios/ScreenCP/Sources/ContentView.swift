@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var setupGroup: RemoteGroup?
     @State private var creatingStarters = false
     @State private var showOnboarding = !AppGroupStore.suite.bool(forKey: "onboarded")
+    @StateObject private var today = TodayModel()
     @Environment(\.scenePhase) private var scenePhase
 
     /// Shield "Request time" button routes here via the ShieldAction extension.
@@ -38,6 +39,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let d = today.day { TodayView(day: d) }
                 if authStatus != .approved {
                     Section {
                         Button("Enable Screen Time Access") {
@@ -80,12 +82,13 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("ScreenCP")
-            .refreshable { await sync.syncNow() }
-            .task { await sync.syncNow() }
+            .refreshable { await sync.syncNow(); await today.load() }
+            .task { await sync.syncNow(); await today.load() }
             .onChange(of: scenePhase) { phase in
                 if phase == .active {
                     Task {
                         await sync.syncNow()
+                        await today.load()
                         consumePendingUnlock()
                         consumePendingSetup()
                     }

@@ -17,6 +17,7 @@
 		3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F108E947B409386ACE147906 /* SyncService.swift */; };
 		423F8ACC6C8C1E862D6AD66E /* ScreenCPWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA069F8B4430E8981B00B86A /* ScreenCPWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		478657F796AA6E87613E5492 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		48A37C01B537F996AD79DD58 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE394EA4C44A72252764D72 /* TodayView.swift */; };
 		4CD71649357F8DC8C244D562 /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
 		4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */; };
@@ -127,6 +128,7 @@
 		471EB8DE767768A0EAC8C2D6 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantActivityAttributes.swift; sourceTree = "<group>"; };
 		59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorExtension.swift; sourceTree = "<group>"; };
+		5AE394EA4C44A72252764D72 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5F7341B4D1B1435CAFE58912 /* ScreenCP.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScreenCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D3DAFBC67881E84E5506891 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -258,6 +260,7 @@
 				91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */,
 				9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */,
 				F108E947B409386ACE147906 /* SyncService.swift */,
+				5AE394EA4C44A72252764D72 /* TodayView.swift */,
 				23B134360FE0EE229150729A /* UnlockSheet.swift */,
 			);
 			name = Sources;
@@ -530,6 +533,7 @@
 				5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */,
 				B0081C50CFC2923E906927EE /* SyncCoordinator.swift in Sources */,
 				3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */,
+				48A37C01B537F996AD79DD58 /* TodayView.swift in Sources */,
 				8627215CEE37FE8C2141D561 /* UnlockSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

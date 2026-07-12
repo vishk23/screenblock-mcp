@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// Standalone window: map installed Mac apps into a ScreenCP group.
 /// The Mac analog of the iOS FamilyActivityPicker — except macOS lets us
@@ -23,14 +24,21 @@ struct GroupEditorView: View {
             TextField("Search apps…", text: $query)
                 .textFieldStyle(.roundedBorder)
             List(filtered) { app in
-                Toggle(app.name, isOn: Binding(
+                Toggle(isOn: Binding(
                     get: { sync.selections[groupId, default: []].contains(app.id) },
                     set: { on in
                         var sel = sync.selections[groupId, default: []]
                         if on { sel.insert(app.id) } else { sel.remove(app.id) }
                         sync.selections[groupId] = sel
                     }
-                ))
+                )) {
+                    HStack {
+                        if let icon = NSWorkspace.shared.icon(forBundleId: app.id) {
+                            Image(nsImage: icon).resizable().frame(width: 20, height: 20)
+                        }
+                        Text(app.name)
+                    }
+                }
             }
             HStack {
                 Text("\(sync.selections[groupId, default: []].count) selected")
