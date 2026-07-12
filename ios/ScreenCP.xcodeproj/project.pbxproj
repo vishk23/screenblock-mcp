@@ -11,18 +11,24 @@
 		2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */; };
 		2166DEA69E81D117BC4DBAD2 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		2796E3A1CA204E26FB9C7D01 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		2AA91633C6FD0653F682E605 /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
 		2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		39C95B2EC3490D5C2F7846F6 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		3DE6DF1B005E15DE836C12A5 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F108E947B409386ACE147906 /* SyncService.swift */; };
+		423F8ACC6C8C1E862D6AD66E /* ScreenCPWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA069F8B4430E8981B00B86A /* ScreenCPWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		478657F796AA6E87613E5492 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
+		4CD71649357F8DC8C244D562 /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
 		4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
 		5268BE15AFDA92145455BC9A /* SpikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EE2E1E47F1CB7FCCF31010 /* SpikeView.swift */; };
 		540F4B7363B0D5B5805BCAB6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		5C539374B0466C50924AF364 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		67E5C7048796FEAC6FC2B2DB /* SetupPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */; };
 		6A4677A92B524610921F67FC /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CBAF68EF8984183420816 /* Secrets.swift */; };
+		6C5B446071DA3E748F08C3EA /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
 		6CD720D54858235660FD4B50 /* ScreenCPMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7590A888ED165B957E67C9AF /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
+		7A33835235ED24EEFCB0AE15 /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
 		8315F1A7CDE380E7CBE8F5CD /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC63273BBC58374DDF536C5 /* OnboardingView.swift */; };
 		837C905453272C916F201A3E /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
 		8627215CEE37FE8C2141D561 /* UnlockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B134360FE0EE229150729A /* UnlockSheet.swift */; };
@@ -31,7 +37,9 @@
 		8C8461D5B9213E346050B4C4 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841BBC193A5364DD09CBF2FF /* Models.swift */; };
 		92DECF3A92E409F10B870C9A /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		96B6E681ED743ED067FD7BE9 /* EnforcementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */; };
+		9ACDB0EAFF58D7E197091661 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471EB8DE767768A0EAC8C2D6 /* LiveActivityManager.swift */; };
 		9C0989A7267F0653544CE3BE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3131938E0438D2114E0E7C /* AppDelegate.swift */; };
+		A416E985058AC286A0AF7F44 /* GrantActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */; };
 		A512A0835888895A87FD8F90 /* ShieldDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886279C61F03185BE6C3B80D /* ShieldDataSource.swift */; };
 		A7FFEA15FD70A8E1B9382C52 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */; };
@@ -42,6 +50,7 @@
 		BF477227A683047996E156E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6D3DAFBC67881E84E5506891 /* Assets.xcassets */; };
 		C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		C7EE1698E858B31EA7CC0D94 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BB6BD51B1771E3A6F2205F /* Brand.swift */; };
+		C9C9529968601025379D2D80 /* GrantLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FDABB63FEF9D81CDD694DAE /* GrantLiveActivity.swift */; };
 		CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */; };
 		D68B3A76A2832F04E2BF582A /* AppGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */; };
 		DB3EF94D5128649632BD4B59 /* ScreenCPApplier.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -58,6 +67,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 9E80943E1C7AAF8991356FD9;
 			remoteInfo = ScreenCPApplier;
+		};
+		A478723AD087B7970358CF63 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 359F9B31ADA8C15722BA4FC4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1FE03199892430D3EDCC3C23;
+			remoteInfo = ScreenCPWidgets;
 		};
 		BAE1FDB2D0A283A4936903E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -93,6 +109,7 @@
 				DB3EF94D5128649632BD4B59 /* ScreenCPApplier.appex in Embed Foundation Extensions */,
 				6CE7D4367E59AF1F65C58080 /* ScreenCPShield.appex in Embed Foundation Extensions */,
 				88DDB3B07B4CF5596A4D2965 /* ScreenCPShieldAction.appex in Embed Foundation Extensions */,
+				423F8ACC6C8C1E862D6AD66E /* ScreenCPWidgets.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -106,6 +123,9 @@
 		23B134360FE0EE229150729A /* UnlockSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockSheet.swift; sourceTree = "<group>"; };
 		2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupStore.swift; sourceTree = "<group>"; };
 		2E45EA318A651CEF15FE88C7 /* ScreenCPApplier.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPApplier.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FDABB63FEF9D81CDD694DAE /* GrantLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantLiveActivity.swift; sourceTree = "<group>"; };
+		471EB8DE767768A0EAC8C2D6 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantActivityAttributes.swift; sourceTree = "<group>"; };
 		59EBEB1710DD4ED237D42172 /* MonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorExtension.swift; sourceTree = "<group>"; };
 		5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5F7341B4D1B1435CAFE58912 /* ScreenCP.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScreenCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -122,6 +142,7 @@
 		9A3131938E0438D2114E0E7C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9CF7AFEAC90D56F086889FD8 /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
 		A0BB6BD51B1771E3A6F2205F /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
+		AA069F8B4430E8981B00B86A /* ScreenCPWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ScreenCPShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F108E947B409386ACE147906 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		F6033BFFDF0B194DB1600F02 /* SetupPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupPickerView.swift; sourceTree = "<group>"; };
@@ -147,6 +168,7 @@
 				29E000773319743297D94698 /* Sources */,
 				0CA908DED08CF32EBCAD433C /* Sources */,
 				29637599772451748125C4F1 /* Sources */,
+				73A12A69C2D06D6513AD1F22 /* Sources */,
 				4B0E68F28C1B35EAB9CAAC8F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -195,6 +217,7 @@
 				1C1607B5CE8B4B99C93FA298 /* ScreenCPMonitor.appex */,
 				75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */,
 				B44DA802A815BCC168DE6705 /* ScreenCPShieldAction.appex */,
+				AA069F8B4430E8981B00B86A /* ScreenCPWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -205,10 +228,20 @@
 				2462D8E2E9A6511DE977E7E4 /* AppGroupStore.swift */,
 				A0BB6BD51B1771E3A6F2205F /* Brand.swift */,
 				975A797ED1FD72531ED1F9A7 /* EnforcementEngine.swift */,
+				4BB93A684A53F84F7EDCC058 /* GrantActivityAttributes.swift */,
 				841BBC193A5364DD09CBF2FF /* Models.swift */,
 			);
 			name = Shared;
 			path = ScreenCP/Shared;
+			sourceTree = "<group>";
+		};
+		73A12A69C2D06D6513AD1F22 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2FDABB63FEF9D81CDD694DAE /* GrantLiveActivity.swift */,
+			);
+			name = Sources;
+			path = ScreenCPWidgets/Sources;
 			sourceTree = "<group>";
 		};
 		F2959C3B03A0216EC55E9A4B /* Sources */ = {
@@ -217,6 +250,7 @@
 				9A3131938E0438D2114E0E7C /* AppDelegate.swift */,
 				6E6945394780099D6AC387EE /* BackendClient.swift */,
 				5BD7CAEC34BCB53D0AF547C9 /* ContentView.swift */,
+				471EB8DE767768A0EAC8C2D6 /* LiveActivityManager.swift */,
 				0CC63273BBC58374DDF536C5 /* OnboardingView.swift */,
 				8FD4BAEE01F6FAE18DE59F9E /* ScreenCPApp.swift */,
 				938CBAF68EF8984183420816 /* Secrets.swift */,
@@ -248,6 +282,7 @@
 				485CF8AAE38C231D9BE10C91 /* PBXTargetDependency */,
 				8F934F37AEC029A2E18291DB /* PBXTargetDependency */,
 				9F5BB7C49FEEF24C3372BDF0 /* PBXTargetDependency */,
+				CE59CC4A74E0093B0A9F292B /* PBXTargetDependency */,
 			);
 			name = ScreenCP;
 			packageProductDependencies = (
@@ -271,6 +306,23 @@
 			);
 			productName = ScreenCPShield;
 			productReference = 75CA48D93A96E94EA0CF94D0 /* ScreenCPShield.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		1FE03199892430D3EDCC3C23 /* ScreenCPWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5DCE736EB4D36C8298808E4 /* Build configuration list for PBXNativeTarget "ScreenCPWidgets" */;
+			buildPhases = (
+				9C3F1A2EBFD727CA08320164 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScreenCPWidgets;
+			packageProductDependencies = (
+			);
+			productName = ScreenCPWidgets;
+			productReference = AA069F8B4430E8981B00B86A /* ScreenCPWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		7A06FC26E8FE4C448D42309F /* ScreenCPMonitor */ = {
@@ -341,6 +393,10 @@
 						DevelopmentTeam = R78VP2V5AQ;
 						ProvisioningStyle = Automatic;
 					};
+					1FE03199892430D3EDCC3C23 = {
+						DevelopmentTeam = R78VP2V5AQ;
+						ProvisioningStyle = Automatic;
+					};
 					7A06FC26E8FE4C448D42309F = {
 						DevelopmentTeam = R78VP2V5AQ;
 						ProvisioningStyle = Automatic;
@@ -374,6 +430,7 @@
 				7A06FC26E8FE4C448D42309F /* ScreenCPMonitor */,
 				1CE3AE8BD714CF801F081740 /* ScreenCPShield */,
 				A1A40A62F928A04B65206C8D /* ScreenCPShieldAction */,
+				1FE03199892430D3EDCC3C23 /* ScreenCPWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -397,6 +454,7 @@
 				D68B3A76A2832F04E2BF582A /* AppGroupStore.swift in Sources */,
 				2166DEA69E81D117BC4DBAD2 /* Brand.swift in Sources */,
 				BB847333C9AFEBAD6773923C /* EnforcementEngine.swift in Sources */,
+				7A33835235ED24EEFCB0AE15 /* GrantActivityAttributes.swift in Sources */,
 				540F4B7363B0D5B5805BCAB6 /* Models.swift in Sources */,
 				A512A0835888895A87FD8F90 /* ShieldDataSource.swift in Sources */,
 			);
@@ -409,6 +467,7 @@
 				C23592FF5EA298F8E4E01666 /* AppGroupStore.swift in Sources */,
 				5C539374B0466C50924AF364 /* Brand.swift in Sources */,
 				E5D4301365A5312823E0E919 /* EnforcementEngine.swift in Sources */,
+				7590A888ED165B957E67C9AF /* GrantActivityAttributes.swift in Sources */,
 				8C8461D5B9213E346050B4C4 /* Models.swift in Sources */,
 				2157F04B5F48A6D609F8EF88 /* MonitorExtension.swift in Sources */,
 			);
@@ -421,6 +480,7 @@
 				E0EBC64CBEA99880165686BB /* AppGroupStore.swift in Sources */,
 				C7EE1698E858B31EA7CC0D94 /* Brand.swift in Sources */,
 				B2990C2DA0DBD43591A768D1 /* EnforcementEngine.swift in Sources */,
+				A416E985058AC286A0AF7F44 /* GrantActivityAttributes.swift in Sources */,
 				2E2E61AD5123477D86D3A2FD /* Models.swift in Sources */,
 				4D2A005DE099D1A4CCBD63DE /* Secrets.swift in Sources */,
 				0329E9BD4E86C588B0C94697 /* ShieldActionHandler.swift in Sources */,
@@ -434,9 +494,19 @@
 				92DECF3A92E409F10B870C9A /* AppGroupStore.swift in Sources */,
 				837C905453272C916F201A3E /* Brand.swift in Sources */,
 				96B6E681ED743ED067FD7BE9 /* EnforcementEngine.swift in Sources */,
+				6C5B446071DA3E748F08C3EA /* GrantActivityAttributes.swift in Sources */,
 				2796E3A1CA204E26FB9C7D01 /* Models.swift in Sources */,
 				87CB99F6A268ACF324277FF0 /* NotificationService.swift in Sources */,
 				39C95B2EC3490D5C2F7846F6 /* Secrets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C3F1A2EBFD727CA08320164 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AA91633C6FD0653F682E605 /* GrantActivityAttributes.swift in Sources */,
+				C9C9529968601025379D2D80 /* GrantLiveActivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,6 +520,8 @@
 				B97D341D774D0F76BC927336 /* Brand.swift in Sources */,
 				CED3EC698E5655F3AB3F1FDF /* ContentView.swift in Sources */,
 				FD1BFD127E76091EFF02C083 /* EnforcementEngine.swift in Sources */,
+				4CD71649357F8DC8C244D562 /* GrantActivityAttributes.swift in Sources */,
+				9ACDB0EAFF58D7E197091661 /* LiveActivityManager.swift in Sources */,
 				478657F796AA6E87613E5492 /* Models.swift in Sources */,
 				8315F1A7CDE380E7CBE8F5CD /* OnboardingView.swift in Sources */,
 				AC6544AF53B9FB5CEE6466CF /* ScreenCPApp.swift in Sources */,
@@ -485,9 +557,33 @@
 			target = A1A40A62F928A04B65206C8D /* ScreenCPShieldAction */;
 			targetProxy = F3A0E80E34098EE69E706841 /* PBXContainerItemProxy */;
 		};
+		CE59CC4A74E0093B0A9F292B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1FE03199892430D3EDCC3C23 /* ScreenCPWidgets */;
+			targetProxy = A478723AD087B7970358CF63 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		07040529B9194733D32DBD30 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CFBundleShortVersionString = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenCPWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.widgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		3B3B8440F89C1883247F0178 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -553,6 +649,25 @@
 					"@executable_path/../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.monitor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		92EF11AC7D92A002ED216E49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CFBundleShortVersionString = 0.1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenCPWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.vishnukchitti.screencp.widgets;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -824,6 +939,15 @@
 			buildConfigurations = (
 				A77EA362610FFA62B2174638 /* Debug */,
 				F0DC3A1075D2E9E9BEB1C1C7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C5DCE736EB4D36C8298808E4 /* Build configuration list for PBXNativeTarget "ScreenCPWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92EF11AC7D92A002ED216E49 /* Debug */,
+				07040529B9194733D32DBD30 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

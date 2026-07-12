@@ -23,6 +23,7 @@ targets:
       - target: ScreenCPApplier
       - target: ScreenCPShield
       - target: ScreenCPShieldAction
+      - target: ScreenCPWidgets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp
@@ -34,6 +35,7 @@ targets:
       path: ScreenCP/Info.plist
       properties:
         UIBackgroundModes: [remote-notification]
+        NSSupportsLiveActivities: true
   ScreenCPApplier:
     type: app-extension
     platform: iOS
@@ -54,6 +56,26 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.usernotifications.service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+  ScreenCPWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ScreenCPWidgets/Sources
+      - ScreenCP/Shared/GrantActivityAttributes.swift
+    settings:
+      base:
+        IPHONEOS_DEPLOYMENT_TARGET: "16.2"
+        PRODUCT_BUNDLE_IDENTIFIER: com.vishnukchitti.screencp.widgets
+        GENERATE_INFOPLIST_FILE: YES
+        CURRENT_PROJECT_VERSION: "1"
+        CFBundleShortVersionString: "0.1.0"
+    info:
+      path: ScreenCPWidgets/Info.plist
+      properties:
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
   ScreenCPShieldAction:
     type: app-extension
     platform: iOS

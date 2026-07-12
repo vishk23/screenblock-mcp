@@ -16,5 +16,6 @@ final class SyncCoordinator: ObservableObject {
         grants = AppGroupStore.grants
         lastError = error
         if error == nil { lastSync = Date() }
+        LiveActivityManager.reconcile(groups: groups, grants: grants)
     }
 }
