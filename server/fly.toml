@@ -13,3 +13,7 @@ primary_region = "iad"
 [[vm]]
   size = "shared-cpu-1x"
   memory = "256mb"
+
+[mounts]
+  source = "screencp_data"
+  destination = "/data"

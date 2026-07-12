@@ -1,11 +1,14 @@
 import 'dotenv/config';
 import { loadConfig } from './config.js';
 import { makePool, PgRepo } from './repo.js';
+import { makeDb, SqliteRepo } from './repoSqlite.js';
 import { Ladder, ApnsSender, NoopSender } from './push.js';
 import { makeApp } from './app.js';
 
 const config = loadConfig();
-const repo = new PgRepo(makePool(config.databaseUrl));
+const repo = config.sqlitePath
+  ? new SqliteRepo(makeDb(config.sqlitePath))
+  : new PgRepo(makePool(config.databaseUrl));
 const sender = config.apns ? await ApnsSender.create(config.apns) : new NoopSender();
 const push = new Ladder(repo, sender);
 

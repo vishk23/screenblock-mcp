@@ -9,6 +9,7 @@ export interface ApnsConfig {
 export interface Config {
   port: number;
   databaseUrl: string;
+  sqlitePath: string | null;
   mcpBearerToken: string;
   deviceBearerToken: string;
   maxGrantMinutes: number;
@@ -31,9 +32,12 @@ export function loadConfig(env: Env = process.env): Config {
     if (!Number.isFinite(n)) throw new Error(`Invalid numeric env var: ${k}=${v}`);
     return n;
   };
+  const sqlitePath = env.SQLITE_PATH ?? null;
   return {
     port: num('PORT', 8080),
-    databaseUrl: required('DATABASE_URL'),
+    // DATABASE_URL only required when not using SQLite.
+    databaseUrl: sqlitePath ? (env.DATABASE_URL ?? '') : required('DATABASE_URL'),
+    sqlitePath,
     mcpBearerToken: required('MCP_BEARER_TOKEN'),
     deviceBearerToken: required('DEVICE_BEARER_TOKEN'),
     maxGrantMinutes: num('MAX_GRANT_MINUTES', 60),
