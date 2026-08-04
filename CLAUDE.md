@@ -1,6 +1,6 @@
-# ScreenCP
+# ScreenBlock MCP (formerly ScreenCP)
 
-Chat-controlled screen-time enforcement: MCP server (server/, Fly.io + Supabase) + iOS app (ios/, XcodeGen). The user's phone blocks distracting apps; ChatGPT/Claude/Claude Code act as the executive-function coach through the same 13 MCP tools.
+Chat-controlled screen-time enforcement: MCP server (server/, Fly.io + SQLite) + iOS app (ios/, XcodeGen). Public repo: github.com/vishk23/screenblock-mcp. The user's phone blocks distracting apps; ChatGPT/Claude/Claude Code act as the executive-function coach through the same 14 MCP tools. Internal plumbing (bundle IDs, Xcode targets, Fly app `screencp`, `mcp__screencp__` connector key) intentionally keeps the old name.
 
 ## You have the keys
 
