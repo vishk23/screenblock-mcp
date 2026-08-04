@@ -89,10 +89,12 @@ You deploy your own instance; there is no shared service.
 cd server
 cp .env.example .env        # fill in tokens (long random strings)
 fly launch --no-deploy      # pick an app name; add a volume for SQLite:
-fly volumes create data --size 1
+fly volumes create screencp_data --size 1
 fly secrets set MCP_BEARER_TOKEN=... DEVICE_BEARER_TOKEN=... SQLITE_PATH=/data/screenblock.db TIMEZONE=America/New_York
 fly deploy --yes
 ```
+
+`screencp` is taken, so edit `app` in `fly.toml` to your own app name before deploying.
 
 **2. iPhone app** — requires a paid Apple Developer account (Family Controls
 entitlement) and a real device (Screen Time APIs don't work in the simulator).
@@ -100,7 +102,7 @@ entitlement) and a real device (Screen Time APIs don't work in the simulator).
 ```bash
 cd ios
 xcodegen generate
-# put your server URL + DEVICE_BEARER_TOKEN in ScreenCP/Sources/Secrets.swift
+# put your server URL + DEVICE_BEARER_TOKEN in ScreenCP/Sources/Secrets.swift (copy Secrets.swift.example)
 xcodebuild -project ScreenCP.xcodeproj -scheme ScreenCP \
   -destination 'platform=iOS,id=<your-device-udid>' -allowProvisioningUpdates build
 ```
@@ -115,8 +117,9 @@ For ChatGPT: add a custom connector with the same URL and enable "Allow all
 actions". For APNs pushes (instant re-shielding), set the `APNS_*` secrets
 from `.env.example`.
 
-**4. Mac app (optional)** — `cd mac && xcodegen generate && xcodebuild build`,
-then log in with the same server URL.
+**4. Mac app (optional)** — configuration is compile-time: copy
+`mac/ScreenCPMac/Sources/Secrets.swift.example` to `Secrets.swift` and fill
+in, then `cd mac && xcodegen generate && xcodebuild build`.
 
 ## Security model
 

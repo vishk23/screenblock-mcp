@@ -12,7 +12,9 @@ targets:
     type: application
     platform: macOS
     sources:
-      - ScreenCPMac/Sources
+      - path: ScreenCPMac/Sources
+        excludes:
+          - "Secrets.swift.example"
       - ScreenCPMac/Resources
     settings:
       base:

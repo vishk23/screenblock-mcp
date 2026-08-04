@@ -1,6 +1,6 @@
 import Foundation
 
-/// Thin client for the ScreenCP device API (server/src/deviceApi.ts).
+/// Thin client for the ScreenBlock device API (server/src/deviceApi.ts).
 struct BackendClient {
     let baseURL: URL
     let deviceToken: String // DEVICE_BEARER_TOKEN

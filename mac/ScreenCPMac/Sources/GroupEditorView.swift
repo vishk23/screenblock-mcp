@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// Standalone window: map installed Mac apps into a ScreenCP group.
+/// Standalone window: map installed Mac apps into a ScreenBlock group.
 /// The Mac analog of the iOS FamilyActivityPicker — except macOS lets us
 /// build it ourselves, with search and no opaque tokens.
 struct GroupEditorView: View {

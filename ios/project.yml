@@ -15,7 +15,9 @@ targets:
     type: application
     platform: iOS
     sources:
-      - ScreenCP/Sources
+      - path: ScreenCP/Sources
+        excludes:
+          - "Secrets.swift.example"
       - ScreenCP/Shared
       - ScreenCP/Resources
     dependencies:
