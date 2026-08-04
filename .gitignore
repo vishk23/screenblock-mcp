@@ -5,3 +5,4 @@ server/.apns/
 mac/ScreenCPMac.xcodeproj/
 mac/ScreenCPMac/Sources/Secrets.swift
 scratch/
+node_modules/
