@@ -4,6 +4,6 @@ import Foundation
 /// Change this ONE value to rebrand everything on iOS. (Bundle IDs are internal
 /// plumbing and stay as-is.)
 enum Brand {
-    static let name = "ScreenCP"
+    static let name = "ScreenBlock"
     static let shieldTitle = "Blocked by \(name)"
 }
