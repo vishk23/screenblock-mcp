@@ -81,7 +81,7 @@ struct ContentView: View {
                     NavigationLink("Developer tools") { SpikeView() }
                 }
             }
-            .navigationTitle("ScreenCP")
+            .navigationTitle(Brand.name)
             .refreshable { await sync.syncNow(); await today.load() }
             .task { await sync.syncNow(); await today.load() }
             .onChange(of: scenePhase) { phase in

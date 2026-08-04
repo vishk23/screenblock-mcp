@@ -18,7 +18,7 @@ struct ScreenCPMacApp: App {
     @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
-        MenuBarExtra("ScreenCP", systemImage: "hourglass") {
+        MenuBarExtra(Brand.name, systemImage: "hourglass") {
             SpikeMenu()
         }
         .menuBarExtraStyle(.window)

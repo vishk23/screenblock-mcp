@@ -46,7 +46,7 @@ struct OnboardingView: View {
 
     private var welcome: some View {
         pageBody(icon: "brain.head.profile", "Your coach controls the locks",
-                 "ScreenCP blocks distracting apps on this iPhone — and ChatGPT is the control room. You talk; your phone obeys. This setup takes about two minutes.") {
+                 "\(Brand.name) blocks distracting apps on this iPhone — and ChatGPT is the control room. You talk; your phone obeys. This setup takes about two minutes.") {
             Button("Get started") { withAnimation { page = 1 } }
                 .buttonStyle(.borderedProminent)
         }
@@ -188,7 +188,7 @@ struct OnboardingView: View {
 
     private var connect: some View {
         pageBody(icon: "bubble.left.and.text.bubble.right", "Connect your coach",
-                 "In ChatGPT: Settings → Apps & Connectors → enable Developer mode → Create, and paste your ScreenCP connector URL (you have it from setup). Then just talk:\n\n“Block Social till 5.”\n“Give me 15 minutes of Games.”\n“How did I do today?”") {
+                 "In ChatGPT: Settings → Apps & Connectors → enable Developer mode → Create, and paste your \(Brand.name) connector URL (you have it from setup). Then just talk:\n\n“Block Social till 5.”\n“Give me 15 minutes of Games.”\n“How did I do today?”") {
             Button("Done — start blocking") {
                 AppGroupStore.suite.set(true, forKey: "onboarded")
                 // Deferred from launch: notifications power the "tap to apply"

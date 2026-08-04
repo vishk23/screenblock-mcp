@@ -52,7 +52,7 @@ struct SpikeView: View {
                     Section("Last error") { Text(lastError).font(.footnote) }
                 }
             }
-            .navigationTitle("ScreenCP Spike")
+            .navigationTitle("\(Brand.name) Spike")
             .familyActivityPicker(isPresented: $pickerPresented, selection: $selection)
             .onAppear {
                 authStatus = String(describing: AuthorizationCenter.shared.authorizationStatus)
