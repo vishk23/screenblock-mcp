@@ -14,5 +14,5 @@ const push = new Ladder(repo, sender);
 
 const app = makeApp({ repo, push, config, sender });
 app.listen(config.port, () => {
-  console.log(`screencp server listening on :${config.port} (apns: ${config.apns ? 'on' : 'off'})`);
+  console.log(`screenblock server listening on :${config.port} (apns: ${config.apns ? 'on' : 'off'})`);
 });

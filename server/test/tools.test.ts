@@ -61,7 +61,7 @@ describe('MCP tools', () => {
     const { push, call } = await setup();
     const r = await call('create_group', { name: 'Social' });
     expect(r.json.group.name).toBe('Social');
-    expect(r.json.note).toMatch(/open the ScreenCP iOS app/);
+    expect(r.json.note).toMatch(/open the ScreenBlock iOS app/);
     expect(r.json.delivery).toBe('no_device_registered');
     expect(push.calls).toHaveLength(1);
     const dup = await call('create_group', { name: 'Social' });

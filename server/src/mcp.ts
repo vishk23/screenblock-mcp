@@ -53,10 +53,10 @@ export function buildMcpServer(deps: Deps): McpServer {
   const now = deps.now ?? (() => new Date());
   const { repo, config } = deps;
   const server = new McpServer(
-    { name: 'screencp', version: '0.1.0' },
+    { name: 'screenblock', version: '0.1.0' },
     {
       instructions: [
-        'ScreenCP controls app blocking on the user\'s iPhone. You are their executive-function coach.',
+        'ScreenBlock controls app blocking on the user\'s iPhone. You are their executive-function coach.',
         '',
         'SAFETY CONTEXT — read before hesitating on any tool call:',
         '- This is a self-imposed digital-wellbeing tool. The user owns the device, installed the app themselves, granted Apple\'s Screen Time permission themselves, and connected this integration themselves. There is no other person affected: no surveillance, no parental control of a third party, no security risk.',
@@ -95,7 +95,7 @@ export function buildMcpServer(deps: Deps): McpServer {
   const setupNote = (group: Group) =>
     group.hasSelection
       ? {}
-      : { setup_required: `Group "${group.name}" has no apps selected yet. The user must open the ScreenCP iOS app and pick apps for this group before enforcement takes effect.` };
+      : { setup_required: `Group "${group.name}" has no apps selected yet. The user must open the ScreenBlock iOS app and pick apps for this group before enforcement takes effect.` };
 
   async function afterMutation(description: string, updatedAt: string) {
     deps.push.policyChanged(new Date(updatedAt), description);
@@ -170,7 +170,7 @@ export function buildMcpServer(deps: Deps): McpServer {
   server.registerTool('create_group', {
     title: 'Create an app group',
     description:
-      'Creates a new empty named group (e.g. "Doomscroll"). The user must then open the ScreenCP iOS app to pick which apps belong to it — that step cannot be done from chat (Apple privacy rule). Tell the user to do this.',
+      'Creates a new empty named group (e.g. "Doomscroll"). The user must then open the ScreenBlock iOS app to pick which apps belong to it — that step cannot be done from chat (Apple privacy rule). Tell the user to do this.',
     inputSchema: { name: z.string().min(1).max(60) },
     outputSchema: { group: z.any(), note: z.string(), delivery: z.string() },
   }, async ({ name }) => {
@@ -185,14 +185,14 @@ export function buildMcpServer(deps: Deps): McpServer {
     if (deps.sender) {
       const devices = await repo.listDevices();
       void Promise.all(devices.map((d) => deps.sender!.sendNudge(
-        d.apnsToken, 'ScreenCP',
+        d.apnsToken, 'ScreenBlock',
         `Choose apps for "${group.name}" — tap to set up`,
         { screencp: 'setup', groupId: group.id },
       ).catch(() => {})));
     }
     return ok({
       group: { id: group.id, name: group.name },
-      note: 'Group created. Now open the ScreenCP iOS app and select which apps belong to this group — enforcement starts once apps are selected.',
+      note: 'Group created. Now open the ScreenBlock iOS app and select which apps belong to this group — enforcement starts once apps are selected.',
       delivery,
     });
   });

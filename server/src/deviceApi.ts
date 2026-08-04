@@ -115,7 +115,7 @@ export function makeDeviceRouter(deps: { repo: Repo; config: Config; sender?: Pu
     if (!deps.sender) { res.status(503).json({ error: 'push not configured' }); return; }
     const devices = await repo.listDevices();
     await Promise.all(devices.map((d) =>
-      deps.sender!.sendNudge(d.apnsToken, 'ScreenCP', body.data.body).catch(() => {})));
+      deps.sender!.sendNudge(d.apnsToken, 'ScreenBlock', body.data.body).catch(() => {})));
     res.json({ sent: devices.length });
   }));
 
