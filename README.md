@@ -72,7 +72,12 @@ edit a group's contents. The AI operates on group names alone.
 ## Screenshots
 
 <!-- screenshots: docs/assets/ -->
-*Coming soon — Today dashboard, shield screen, Live Activity countdown.*
+<p align="center">
+  <img src="docs/assets/today-dashboard.png" width="300" alt="Today dashboard" />
+  <img src="docs/assets/onboarding.png" width="300" alt="Onboarding" />
+</p>
+
+*Shield + Live Activity shots require a real device — coming soon.*
 
 ## Self-hosting
 
